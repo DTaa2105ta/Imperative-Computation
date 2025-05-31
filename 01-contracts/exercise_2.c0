@@ -1,0 +1,39 @@
+/*
+int foo(int x)
+//@requires ___________;
+//@ensures ____________;
+{
+int p = 0;
+for (int i = 0; i < x; i++)
+//@loop_invariant ____________;
+//@loop_invariant ____________;
+{
+p += POW(2, i);
+}
+return p;
+}
+*/
+
+int POW (int x, int y)
+//@requires y >= 0;
+{
+    if (y == 0)
+        return 1;
+    else
+        return x * POW(x, y-1);
+}
+
+int foo(int x)
+//@requires x >= 0;
+//@ensures \result == POW(2, x) - 1;
+{
+    int p = 0;
+    for (int i = 0; i < x; i++)
+    //@loop_invariant 0 <= i && i <= x;
+    //@loop_invariant p == POW(2, i) - 1;
+    {
+        p += POW(2, i);
+    }
+    return p;
+}
+

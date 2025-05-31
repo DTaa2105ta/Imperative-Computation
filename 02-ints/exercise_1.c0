@@ -1,0 +1,80 @@
+/*
+Integer division in C0 always rounds
+its result towards zero. In particular -3/2 is equal to -1. An alternative, adopted
+in programming languages like Python, is for division to round towards -infty. In
+this case, -3 divided by 2 is equal to -2. As explained in Section 7, this alternative
+division is called the quotient and the associated notion of modulus is the
+remainder.
+Write functions 'quot' and 'rem' that implement the quotient and remainder
+operations. Your functions should have the property that
+
+quot(x,y)*y + rem(x,y) == x;
+for all ints x and y unless quot overflows.
+*/
+#use <util>
+/* RAW in c0: quotient and modulus
+int abs(int x) 
+{
+    if (x < 0)
+    {
+        return -x;
+    }
+    else 
+    {
+        return x;
+    }
+}
+
+int quot(int x, int y)
+//@requires y != 0;
+{
+    int q = 0;
+    int absX = abs(x);
+    int absY = abs(y);
+    while (absX > 0)
+    {
+        absX = absX - absY;
+        q = q + 1;
+    }
+
+    if (x < 0)
+    {
+        return -q;
+    }
+    else
+    {
+        return q;
+    }
+}
+
+int rem(int x, int y) // Modulus
+//@requires y != 0;
+//@ensures 0 <= \result && \result < y;
+{
+    return x - quot(x,y)*y;
+}
+*/
+
+/* Implement in math, quotient and remainder */
+int quot(int x, int y)
+//@requires y != 0 && !(x == int_min() && y == -1);
+{
+    int q = x/y;
+    if (q < 0 && x%y != 0)
+    {
+        q = q - 1;
+    }
+    return q;
+}
+
+int rem(int x, int y)
+//@requires y != 0 && !(x == int_min() && y == -1);
+//@ensures quot(x,y)*y + \result == x;
+{
+    int r = x % y;
+    if (x/y < 0 && r != 0)
+    {
+        r = r + y;
+    }
+    return r;
+}

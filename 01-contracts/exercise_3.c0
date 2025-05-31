@@ -1,0 +1,17 @@
+int GCD(int a, int b)
+//@requires a > 0 && b > 0;
+//@ensures \result >= 1;
+//@ensures a % \result == 0 && b % \result == 0;
+{
+    int d = min(a, b);
+
+    while (d > 1)
+    //@loop_invariant d >= 1;
+    {
+        if (a % d == 0 && b % d == 0)
+            return d;
+        d = d - 1; 
+    }
+    return d;
+}
+
