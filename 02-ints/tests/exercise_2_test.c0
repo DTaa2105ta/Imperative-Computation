@@ -1,0 +1,58 @@
+#use <conio>
+#use "../exercise_2.c0"
+
+void test_mapping() {
+    // Test single digits (0-9)
+    assert(string_equal(mapping(0), "0"));
+    assert(string_equal(mapping(5), "5"));
+    assert(string_equal(mapping(9), "9"));
+    
+    // Test hex letters (A-F)
+    assert(string_equal(mapping(10), "A"));
+    assert(string_equal(mapping(11), "B"));
+    assert(string_equal(mapping(12), "C"));
+    assert(string_equal(mapping(13), "D"));
+    assert(string_equal(mapping(14), "E"));
+    assert(string_equal(mapping(15), "F"));
+}
+
+void test_int2hex() {
+    // Test basic positive numbers
+    assert(string_equal(int2hex(0), "0x00000000"));
+    assert(string_equal(int2hex(1), "0x00000001"));
+    assert(string_equal(int2hex(15), "0x0000000F"));
+    assert(string_equal(int2hex(16), "0x00000010"));
+    
+    // Test negative numbers
+    assert(string_equal(int2hex(-1), "0xFFFFFFFF"));
+    assert(string_equal(int2hex(-2), "0xFFFFFFFE"));
+    
+    // Test powers of 2
+    assert(string_equal(int2hex(256), "0x00000100"));
+    assert(string_equal(int2hex(65536), "0x00010000"));
+    
+    // Test edge cases
+    assert(string_equal(int2hex(0x7FFFFFFF), "0x7FFFFFFF")); // INT_MAX
+    assert(string_equal(int2hex(0x80000000), "0x80000000")); // INT_MIN
+    
+    // Test numbers with multiple hex digits
+    assert(string_equal(int2hex(0xABCDEF12), "0xABCDEF12"));
+    assert(string_equal(int2hex(0x12345678), "0x12345678"));
+    
+    // Test alternating bit patterns
+    assert(string_equal(int2hex(0xAAAAAAAA), "0xAAAAAAAA"));
+    assert(string_equal(int2hex(0x55555555), "0x55555555"));
+    
+    // Test single bits set
+    assert(string_equal(int2hex(1 << 4), "0x00000010"));
+    assert(string_equal(int2hex(1 << 8), "0x00000100"));
+    assert(string_equal(int2hex(1 << 16), "0x00010000"));
+    assert(string_equal(int2hex(1 << 24), "0x01000000"));
+}
+
+int main() {
+    test_mapping();
+    test_int2hex();
+    print("All tests passed!\n");
+    return 0;
+}

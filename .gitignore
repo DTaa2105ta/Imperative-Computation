@@ -1,9 +1,14 @@
 # Ignore everything by default
 *
 !*/
+
 # Allow only exercise files and .gitignore
 !exercise_*.c0
 !.gitignore
+
+# Allow test files
+!*_test.c0
+!tests/
 
 # Ignore build artifacts and binaries
 *.out

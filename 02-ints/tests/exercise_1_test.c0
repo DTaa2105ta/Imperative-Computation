@@ -1,0 +1,71 @@
+#use <conio>
+// Add this line to import functions from exercise_1.c0
+#use "../exercise_1.c0"
+
+void test_quot() {
+    // Basic positive cases
+    assert(quot(10, 2) == 5);
+    assert(quot(7, 3) == 2);
+    
+    // Basic negative cases
+    assert(quot(-3, 2) == -2);  // Key test case from problem description
+    assert(quot(3, -2) == -2);
+    assert(quot(-3, -2) == 1);
+    
+    // Edge cases
+    assert(quot(0, 1) == 0);
+    assert(quot(1, 1) == 1);
+    assert(quot(-1, 1) == -1);
+    
+    // Large numbers
+    assert(quot(1000000, 2) == 500000);
+    assert(quot(-1000000, 2) == -500000);
+    
+    // Tricky cases
+    assert(quot(5, 3) == 1);    // Not quite enough for 2
+    assert(quot(-5, 3) == -2);  // Rounds toward negative infinity
+    assert(quot(5, -3) == -2);
+    assert(quot(-5, -3) == 1);
+    
+    // Corner cases near INT_MAX and INT_MIN
+    // Note: You might need to adjust these values based on your system's int size
+    assert(quot(2147483647, 1) == 2147483647);  // INT_MAX
+    assert(quot(-2147483648, 1) == -2147483648); // INT_MIN
+    
+    // Cases where division is exact
+    assert(quot(100, 10) == 10);
+    assert(quot(-100, 10) == -10);
+}
+
+void test_rem() {
+    // Basic positive cases
+    assert(rem(10, 3) == 1);
+    assert(rem(7, 3) == 1);
+    
+    // Basic negative cases
+    assert(rem(-3, 2) == 1);  // Key test case related to problem description
+    assert(rem(3, -2) == 1);
+    assert(rem(-3, -2) == 1);
+    
+    // Edge cases
+    assert(rem(0, 1) == 0);
+    assert(rem(1, 1) == 0);
+    assert(rem(-1, 1) == 0);
+    
+    // Tricky cases
+    assert(rem(5, 3) == 2);
+    assert(rem(-5, 3) == 1);
+    assert(rem(5, -3) == 2);
+    assert(rem(-5, -3) == 1);
+    
+    // Verification of the key property: quot(x,y)*y + rem(x,y) == x
+    assert(quot(-5, 3) * 3 + rem(-5, 3) == -5);
+    assert(quot(7, -3) * (-3) + rem(7, -3) == 7);
+}
+
+int main() {
+    test_quot();
+    test_rem();
+    print("All tests passed!\n");
+    return 0;
+}

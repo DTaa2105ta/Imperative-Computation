@@ -1,3 +1,58 @@
 /*
-
+Write a function int2hex that returns
+a string containing the hexadecimal representation of a given integer as a
+string. Your function should have prototype
+string int2hex(int x);
+(The prototype of a function is the function without its body: the prototype gives
+the function name and the type of its arguments.)
 */
+#use <string>
+
+string mapping(int x)
+//@requires (0 <= x && x < 16);
+{
+    string ans = "";
+    if (0 <= x && x <= 9)
+    {
+        ans = string_fromint(x);
+    }
+    if (x == 10)
+    {
+        ans = "A";
+    }
+    if (x == 11)
+    {
+        ans = "B";
+    }
+    if (x == 12)
+    {
+        ans = "C";
+    }
+    if (x == 13)
+    {
+        ans = "D";
+    }
+    if (x == 14)
+    {
+        ans = "E";
+    }
+    else
+    {
+        ans = "F";
+    }
+    assert(false);
+    return ans;
+}
+
+string int2hex(int x) 
+{
+    string hex = "";  
+    for (int i = 0; i < 8; i++)
+    //@loop_invariant (0 <= i && i <= 8);
+    {
+        int digit = x & 0xF; // mask
+        hex = string_join(mapping(digit), hex);
+        x = x >> 4; // right-shift
+    }
+    return string_join("0x", hex);
+}
