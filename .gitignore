@@ -1,0 +1,18 @@
+# Ignore everything by default
+*
+
+# Allow only exercise files and .gitignore
+!exercise_*.c0
+!.gitignore
+
+# Ignore build artifacts and binaries
+*.out
+*.o
+*.exe
+
+# Ignore IDE/tool-specific files
+.vscode/
+.idea/
+
+# Explicitly ignore all directories (except those containing exercises)
+*/
