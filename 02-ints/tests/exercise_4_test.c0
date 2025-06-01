@@ -1,0 +1,104 @@
+#use <conio>
+#use "../exercise_4.c0"
+
+void test_POW_basic() {
+    // Basic positive cases
+    assert(POW(2, 0) == 1);     // Base case
+    assert(POW(2, 1) == 2);     // Simple case
+    assert(POW(2, 3) == 8);     // Multiple steps
+    assert(POW(1, 10) == 1);    // Power of 1
+    assert(POW(0, 5) == 0);     // Power of 0
+    
+    // Edge cases
+    assert(POW(1, 0) == 1);
+    assert(POW(0, 0) == 1);
+}
+
+void test_f_basic() {
+    // Verify f matches POW for basic cases
+    assert(f(2, 0) == POW(2, 0));
+    assert(f(2, 1) == POW(2, 1));
+    assert(f(2, 3) == POW(2, 3));
+    assert(f(1, 10) == POW(1, 10));
+    assert(f(0, 5) == POW(0, 5));
+}
+
+void test_POW_medium() {
+    // Medium-sized calculations
+    assert(POW(2, 10) == 1024);
+    assert(POW(3, 4) == 81);
+    assert(POW(4, 3) == 64);
+}
+
+void test_f_medium() {
+    // Verify f matches POW for medium cases
+    assert(f(2, 10) == 1024);
+    assert(f(3, 4) == 81);
+    assert(f(4, 3) == 64);
+}
+
+void test_safe_cases() {
+    // Test cases that should not overflow
+    assert(POW(2, 30) > 0);     // Just under overflow
+    assert(f(2, 30) > 0);       // Just under overflow
+    assert(POW(3, 19) > 0);     // Large but safe
+    assert(f(3, 19) > 0);       // Large but safe
+}
+
+void test_negative_base() {
+    // Test with negative bases
+    assert(POW(-2, 2) == 4);
+    assert(POW(-2, 3) == -8);
+    assert(f(-2, 2) == 4);
+    assert(f(-2, 3) == -8);
+}
+
+void test_overflow_boundary() {
+    // Test cases near overflow boundary
+    assert(POW(2, 30) == 1073741824);  // Last safe power of 2
+    assert(f(2, 30) == 1073741824);    // Should match POW
+    
+    // Test negative bases near boundary
+    assert(POW(-2, 30) == 1073741824); // Even power is positive
+    assert(f(-2, 30) == 1073741824);   // Should match POW
+}
+
+void test_almost_overflow() {
+    // Cases that are close to but not quite overflow
+    assert(POW(3, 19) == 1162261467);  // Large but safe
+    assert(f(3, 19) == 1162261467);    // Should match POW
+    assert(POW(-3, 19) == -1162261467); // Negative base
+    assert(f(-3, 19) == -1162261467);   // Should match POW
+}
+
+int main() {
+    test_POW_basic();
+    test_f_basic();
+    test_POW_medium();
+    test_f_medium();
+    test_safe_cases();
+    test_negative_base();
+    test_overflow_boundary();
+    test_almost_overflow();
+    
+    // Systematic overflow tests - uncomment one at a time:
+    
+    // 1. Powers of 2 overflow
+    // POW(2, 31);    // Smallest overflow case for power of 2, in C0, the int_max is (2^31 - 1) 
+    
+    
+    // 2. Powers of 3 overflow
+    // POW(3, 20);    // Overflow with base 3
+    
+    // 3. Large base overflow
+    // POW(10, 10);   // Overflow with larger base
+    // POW(16, 8);    // Overflow with power of 16
+    
+    // 4. Function f overflow tests
+    // f(2, 31);      // Should match POW overflow
+    // f(3, 20);      // Should match POW overflow
+    // f(10, 10);     // Should match POW overflow
+    
+    print("All tests passed!\n");
+    return 0;
+}
