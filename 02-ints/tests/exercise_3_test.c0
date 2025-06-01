@@ -1,0 +1,76 @@
+#use <conio>
+#use "../exercise_3.c0"
+
+void test_lsr() {
+    // Test positive numbers
+    assert(lsr(0x80000000, 1) == 0x40000000);  // Most significant bit
+    assert(lsr(0xFFFFFFFF, 1) == 0x7FFFFFFF);  // All bits set
+    assert(lsr(0x10000000, 4) == 0x01000000);  // Simple shift
+    
+    // Test negative numbers (should behave differently from >>)
+    assert(lsr(-1, 1) == 0x7FFFFFFF);  // -1 becomes positive
+    assert(lsr(-2, 1) == 0x7FFFFFFF);  // -2 becomes positive
+    assert(lsr(-4, 2) == 0x3FFFFFFF);  // -4 with shift 2
+    
+    // Test edge cases
+    assert(lsr(0, 1) == 0);            // Zero remains zero
+    assert(lsr(1, 1) == 0);            // One becomes zero
+    assert(lsr(0x7FFFFFFF, 31) == 0);  // INT_MAX shifted all the way
+    assert(lsr(0x80000000, 31) == 1);  // INT_MIN shifted all the way
+    
+    // Test different shift amounts
+    assert(lsr(0xAAAAAAAA, 1) == 0x55555555);  // Alternating bits
+    assert(lsr(0xAAAAAAAA, 2) == 0x2AAAAAAA);
+    assert(lsr(0xAAAAAAAA, 4) == 0x0AAAAAAA);
+    
+    // Test with powers of 2
+    assert(lsr(256, 4) == 16);
+    assert(lsr(65536, 8) == 256);
+    
+    // Test boundary cases
+    assert(lsr(0xFFFFFFFF, 0) == 0xFFFFFFFF);  // No shift         // Full shift
+    
+    // Compare with regular right shift
+    assert(lsr(-1, 1) != (-1 >> 1));           // Should differ for negative numbers
+    assert(lsr(0x7FFFFFFF, 1) == (0x7FFFFFFF >> 1));  // Should be same for positive
+
+    // Additional edge cases with alternating patterns
+    assert(lsr(0x55555555, 1) == 0x2AAAAAAA);  // 0101... pattern
+    assert(lsr(0x33333333, 2) == 0x0CCCCCCC);  // 0011... pattern
+    assert(lsr(0x0F0F0F0F, 4) == 0x00F0F0F0);  // 00001111... pattern
+    
+    // Boundary shifts near 31
+    assert(lsr(0xFFFFFFFF, 30) == 0x00000003);
+    assert(lsr(0xFFFFFFFF, 29) == 0x00000007);
+    assert(lsr(0x80000000, 30) == 0x00000002);
+    
+    // Corner cases with specific bit patterns
+    assert(lsr(0x80000001, 1) == 0x40000000);  // Widely separated 1s
+    assert(lsr(0x88888888, 3) == 0x11111111);  // Regular pattern
+    assert(lsr(0xFFFF0000, 16) == 0x0000FFFF); // Half-full pattern
+    
+    // Tricky shifts with powers of 2 minus 1
+    assert(lsr((1 << 31) - 1, 1) == 0x3FFFFFFF);
+    assert(lsr((1 << 16) - 1, 4) == 0x0000FFF);
+    
+    // Sequence of shifts
+    int x = 0xF0F0F0F0;
+    assert(lsr(lsr(x, 4), 4) == 0x00F0F0F0);
+    assert(lsr(lsr(lsr(x, 8), 8), 8) == 0x000000F0);
+    
+    // Shifts with minimal values
+    assert(lsr(1, 31) == 0);
+    assert(lsr(2, 30) == 0);
+    assert(lsr(3, 30) == 0);
+    
+    // Maximum value shifts
+    assert(lsr(0xFFFFFFFF, 15) == 0x0001FFFF);
+    assert(lsr(0xFFFFFFFF, 16) == 0x0000FFFF);
+    assert(lsr(0xFFFFFFFF, 17) == 0x00007FFF);
+}
+
+int main() {
+    test_lsr();
+    print("All tests passed!\n");
+    return 0;
+}

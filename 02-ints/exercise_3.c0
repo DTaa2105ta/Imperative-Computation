@@ -1,0 +1,30 @@
+/*
+Write a function lsr (logical shift
+right), which is like right shift (>>) except that it fills the most significant bits with
+zeroes instead of copying the sign bit. Explain what lsr(x,1) means on integers
+in two’s complement representation.
+*/
+/* Fill the most significant bits with zeroes */
+int mask_construct(int k)
+//@requires 0 < k && k < 32;
+{
+    /* Implement One's Complement */
+    int maxF = 0xFFFFFFFF;
+    int maxF_copy = 0xFFFFFFFF;
+    maxF = maxF << (32 - k);
+    return maxF ^ maxF_copy;
+}
+
+int lsr(int x, int k)
+//@requires 0 <= k && k < 32;
+{
+    if (k == 0) return x;
+    else 
+    {
+        int input = x;
+        /* right-shift */
+        input = input >> k;
+        return input & mask_construct(k);
+    }
+}
+
