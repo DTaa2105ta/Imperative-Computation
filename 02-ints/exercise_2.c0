@@ -13,35 +13,15 @@ string mapping(int x)
 {
     string ans = "";
     if (0 <= x && x <= 9)
-    {
-        ans = string_fromint(x);
-    }
-    if (x == 10)
-    {
-        ans = "A";
-    }
-    if (x == 11)
-    {
-        ans = "B";
-    }
-    if (x == 12)
-    {
-        ans = "C";
-    }
-    if (x == 13)
-    {
-        ans = "D";
-    }
-    if (x == 14)
-    {
-        ans = "E";
-    }
-    else
-    {
-        ans = "F";
-    }
+        return string_fromint(x);
+    if (x == 10) return "A";
+    if (x == 11) return "B";
+    if (x == 12) return "C";
+    if (x == 13) return "D";
+    if (x == 14) return "E";
+    if (x == 15) return "F";
     assert(false);
-    return ans;
+    return "";
 }
 
 string int2hex(int x) 
