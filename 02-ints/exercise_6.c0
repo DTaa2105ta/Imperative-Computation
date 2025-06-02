@@ -1,0 +1,22 @@
+/*
+The C0 function pixel_by_half(p)
+returns a pixel whose values for the alpha, red, green and blue channels are half of
+the value of respective channels of the pixel p given as an input.
+The following function is an attempt to implement pixel_by_half.
+int pixel_by_half(int p) {
+int alpha = (0xFF000000 & p) / 2;
+int red = (0x00FF0000 & p) / 2;
+int green = (0x0000FF00 & p) / 2;
+int blue = (0x000000FF & p) / 2;
+return alpha | red | green | blue;
+}
+*/
+int pixel_by_half(int p)
+{
+    int mask = 0x000000FF;
+    int alpha_div2 = (mask & (p >> 24))/2;
+    int red_div2 = (mask & (p >> 16))/2;
+    int green_div2 = (mask & (p >> 8))/2;
+    int blue_div2 = (mask & p)/2;
+    return (alpha_div2 << 24) | (red_div2 << 16) | (green_div2 << 8) | (blue_div2);
+}

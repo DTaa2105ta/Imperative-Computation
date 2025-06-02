@@ -1,0 +1,52 @@
+#use <conio>
+#use "../exercise_6.c0"
+
+void test_pixel_by_half() {
+    // Test basic channel halving
+    assert(pixel_by_half(0xFF000000) == 0x7F000000);  // Half alpha only
+    assert(pixel_by_half(0x00FF0000) == 0x007F0000);  // Half red only
+    assert(pixel_by_half(0x0000FF00) == 0x00007F00);  // Half green only
+    assert(pixel_by_half(0x000000FF) == 0x0000007F);  // Half blue only
+    
+    // Test odd numbers (rounding behavior)
+    assert(pixel_by_half(0x01000000) == 0x00000000);  // Alpha rounding
+    assert(pixel_by_half(0x00010000) == 0x00000000);  // Red rounding
+    assert(pixel_by_half(0x00000100) == 0x00000000);  // Green rounding
+    assert(pixel_by_half(0x00000001) == 0x00000000);  // Blue rounding
+    
+    // Edge cases
+    assert(pixel_by_half(0x00000000) == 0x00000000);  // All zeros
+    assert(pixel_by_half(0xFFFFFFFF) == 0x7F7F7F7F);  // All ones
+    
+    // Test maximum values
+    assert(pixel_by_half(0xFF000000) == 0x7F000000);  // Max alpha
+    assert(pixel_by_half(0x00FF0000) == 0x007F0000);  // Max red
+    assert(pixel_by_half(0x0000FF00) == 0x00007F00);  // Max green
+    assert(pixel_by_half(0x000000FF) == 0x0000007F);  // Max blue
+    
+    // Test odd-even combinations
+    assert(pixel_by_half(0xFEFEFEFE) == 0x7F7F7F7F);  // Even values
+    assert(pixel_by_half(0x01010101) == 0x00000000);  // Odd values
+    
+    // Test channel independence
+    int test_pixel = 0x12345678;
+    int result = pixel_by_half(test_pixel);
+    assert((result & 0xFF000000) == ((test_pixel & 0xFF000000) / 2));  // Alpha
+    assert((result & 0x00FF0000) == ((test_pixel & 0x00FF0000) / 2));  // Red
+    assert((result & 0x0000FF00) == ((test_pixel & 0x0000FF00) / 2));  // Green
+    assert((result & 0x000000FF) == ((test_pixel & 0x000000FF) / 2));  // Blue
+    
+    // Test common values
+    assert(pixel_by_half(0x80808080) == 0x40404040);  // Mid-range values
+    assert(pixel_by_half(0xA5A5A5A5) == 0x52525252);  // Pattern
+    
+    // Test boundary conditions
+    assert(pixel_by_half(0x01010101) == 0x00000000);  // Just above zero
+    assert(pixel_by_half(0xFFFFFFFE) == 0x7F7F7F7F);  // Just below max
+}
+
+int main() {
+    test_pixel_by_half();
+    print("All tests passed!\n");
+    return 0;
+}
