@@ -1,0 +1,72 @@
+#use <conio>
+#use "../exercise_5.c0"
+
+void test_opacify() {
+    // Basic color preservation tests
+    assert(opacify(0x00FF0000) == 0xFFFF0000);  // Red with zero alpha
+    assert(opacify(0x0000FF00) == 0xFF00FF00);  // Green with zero alpha
+    assert(opacify(0x000000FF) == 0xFF0000FF);  // Blue with zero alpha
+    
+    // Alpha channel behavior
+    assert(opacify(0x80FFFFFF) == 0xFFFFFFFF);  // Semi-transparent white
+    assert(opacify(0x00000000) == 0xFF000000);  // Fully transparent black
+    assert(opacify(0xFF000000) == 0xFF000000);  // Already opaque black
+    
+    // Edge cases
+    assert(opacify(0xFFFFFFFF) == 0xFFFFFFFF);  // All bits set
+    assert(opacify(0x00000000) == 0xFF000000);  // No bits set
+    assert(opacify(0x55555555) == 0xFF555555);  // Alternating bits
+    assert(opacify(0xAAAAAAAA) == 0xFFAAAAAA);  // Inverse alternating bits
+    
+    // Color channel boundaries
+    assert(opacify(0x00FFFFFF) == 0xFFFFFFFF);  // All color channels max
+    assert(opacify(0x00800000) == 0xFF800000);  // Test MSB of red channel
+    assert(opacify(0x00008000) == 0xFF008000);  // Test MSB of green channel
+    assert(opacify(0x00000080) == 0xFF000080);  // Test MSB of blue channel
+    
+    // Mixed values
+    assert(opacify(0x12345678) == 0xFF345678);  // Random color value
+    assert(opacify(0x99999999) == 0xFF999999);  // Repeated pattern
+    assert(opacify(0x01234567) == 0xFF234567);  // Sequential pattern
+    
+    // Special combinations
+    assert(opacify(0x00808080) == 0xFF808080);  // Mid-gray
+    assert(opacify(0x7F7F7F7F) == 0xFF7F7F7F);  // Mixed gray
+    assert(opacify(0x00ABCDEF) == 0xFFABCDEF);  // Common test value
+    
+    // Preserving specific channels
+    assert((opacify(0x12345678) & 0x00FF0000) == 0x00340000);  // Red preserved
+    assert((opacify(0x12345678) & 0x0000FF00) == 0x00005600);  // Green preserved
+    assert((opacify(0x12345678) & 0x000000FF) == 0x00000078);  // Blue preserved
+
+    // Opacity tests - verifying alpha channel becomes 0xFF
+    assert((opacify(0x00FFFFFF) & 0xFF000000) == 0xFF000000); // Transparent white becomes opaque
+    assert((opacify(0x80FFFFFF) & 0xFF000000) == 0xFF000000); // Semi-transparent white becomes opaque
+    assert((opacify(0x01FFFFFF) & 0xFF000000) == 0xFF000000); // Nearly transparent white becomes opaque
+    assert((opacify(0xFEFFFFFF) & 0xFF000000) == 0xFF000000); // Nearly opaque white becomes opaque
+    
+    // Original tests for color preservation with opacity check
+    int test_color = 0x12345678;
+    int result = opacify(test_color);
+    assert((result & 0xFF000000) == 0xFF000000);  // Check alpha is 0xFF
+    assert((result & 0x00FFFFFF) == (test_color & 0x00FFFFFF));  // Check colors preserved
+
+    // Edge cases for opacity
+    assert((opacify(0x00000000) & 0xFF000000) == 0xFF000000);  // Fully transparent black
+    assert((opacify(0x00123456) & 0xFF000000) == 0xFF000000);  // Random transparent color
+    assert((opacify(0xFF123456) & 0xFF000000) == 0xFF000000);  // Already opaque color
+    
+    // Test with different alpha values but same color
+    int base_color = 0x00ABCDEF;
+    for (int alpha = 0; alpha < 256; alpha += 51) {  // Test different alpha values
+        int pixel = (alpha << 24) | (base_color & 0x00FFFFFF);
+        assert((opacify(pixel) & 0xFF000000) == 0xFF000000);  // Always becomes opaque
+        assert((opacify(pixel) & 0x00FFFFFF) == (base_color & 0x00FFFFFF));  // Colors unchanged
+    }
+}
+
+int main() {
+    test_opacify();
+    print("All tests passed!\n");
+    return 0;
+}

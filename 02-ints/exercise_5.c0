@@ -1,0 +1,14 @@
+/* 
+Using bitwise operations, 
+implement the C0 function opacify(p) 
+that returns the result of making the pixel p totally opaque 
+(i.e., setting its alpha value to 255, while retaining the values of the color
+channels). 
+Assume that the pixels are represented as ints.
+*/
+
+int opacify(int p)
+{
+    int mask_opa = 0xFF000000;
+    return (p | mask_opa);
+}
