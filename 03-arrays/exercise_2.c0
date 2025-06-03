@@ -1,0 +1,28 @@
+/*
+Write a function copy_into that copies a part of a given array 'source',
+namely n elements starting at position 'i',
+into another given array 'target', starting at position 'j'
+*/
+/*
+As an extra service, make your function return the last position in the target array
+that it entered data into, or -1 if no such position exists. Develop a specification
+and loop invariants for this function. Prove that it works correctly by checking the
+loop invariant and proving array bounds
+*/
+#use "exercise_0.c0"
+int copy_into(int[] source, int i, int n, int[] target, int j)
+//@requires n >= 0;
+//@requires 0 <= i && i + n <= \length(source);
+//@requires 0 <= j && j + n <= \length(target);
+//@ensures same_segs(source, i, (i + n), target, j, (j + n));
+//@ensures (n == 0 && \result == -1) || (n > 0 && \result == j + n - 1);
+{
+    for (int k = 0; k < n; k++)
+    //@loop_invariant 0 <= k && k <= n;
+    //@loop_invariant same_segs(source, i, (i + k), target, j, (j + k));
+    {
+        target[j+k] = source[i+k];
+    }
+    if (n == 0) return -1;
+    return j + n - 1;
+}

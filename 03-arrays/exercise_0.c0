@@ -1,0 +1,26 @@
+/* 
+Specification function that checks that two array segments of the same length 
+contain the same value in each corresponding position
+*/
+
+bool same_segs(int[] A, int loA, int hiA,
+               int[] B, int loB, int hiB)
+//@requires 0 <= loA && loA <= hiA && hiA <= \length(A);
+//@requires 0 <= loB && loB <= hiB && hiB <= \length(B);
+//@requires hiA - loA == hiB - loB;
+{
+    int i = loA;
+    int j = loB;
+    while (i < hiA)
+    //@loop_invariant loA <= i && i <= hiA;
+    //@loop_invariant loB <= j && j <= hiB;
+    //@loop_invariant hiA - i == hiB - j;
+    {
+        //@assert j < hiB;
+        if (A[i] != B[j])
+            return false;
+        i++;
+        j++;
+    }
+    return true;
+}
