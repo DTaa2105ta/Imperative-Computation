@@ -1,6 +1,7 @@
 #use <conio>
 #use <string>
-#use "../exercise_1.c0"
+//#use "../exercise_1.c0"
+#use "../exercise_1_1.c0"
 
 void test_array_part() {
     // Test 1: Basic functionality

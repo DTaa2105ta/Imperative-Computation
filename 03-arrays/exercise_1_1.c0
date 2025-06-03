@@ -1,0 +1,16 @@
+#use "exercise_0.c0"
+// lo: included
+// hi: excluded
+int[] array_part(int[] A, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(A); 
+//@ensures same_segs(A, lo, hi, \result, 0, hi-lo);
+{
+    int[] ans = alloc_array(int, hi - lo);
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant same_segs(A, lo, i, ans, 0, i-lo);
+    {
+        ans[i - lo] = A[i];
+    }
+    return ans;
+}
