@@ -1,0 +1,74 @@
+#use <conio>
+#use <string>
+#use "../exercise_1.c0"
+
+void test_array_part() {
+    // Test 1: Basic functionality
+    int[] A1 = alloc_array(int, 5);
+    A1[0] = 1; A1[1] = 2; A1[2] = 3; A1[3] = 4; A1[4] = 5;
+    int[] R1 = array_part(A1, 1, 4);
+    assert(R1[0] == 2 && R1[1] == 3 && R1[2] == 4);
+
+    // Test 2: Edge case - Minimum valid segment
+    int[] A2 = alloc_array(int, 5);
+    A2[2] = 42;
+    int[] R2 = array_part(A2, 2, 3);
+    assert(R2[0] == 42);
+
+    // Test 3: Edge case - Full array
+    int[] A3 = alloc_array(int, 3);
+    A3[0] = 10; A3[1] = 20; A3[2] = 30;
+    int[] R3 = array_part(A3, 0, 3);
+    assert(R3[0] == 10 && R3[1] == 20 && R3[2] == 30);
+
+    // Test 4: Edge case - First elements
+    int[] A4 = alloc_array(int, 5);
+    A4[0] = 1; A4[1] = 2;
+    int[] R4 = array_part(A4, 0, 2);
+    assert(R4[0] == 1 && R4[1] == 2);
+
+    // Test 5: Edge case - Last elements
+    int[] A5 = alloc_array(int, 5);
+    A5[3] = 4; A5[4] = 5;
+    int[] R5 = array_part(A5, 3, 5);
+    assert(R5[0] == 4 && R5[1] == 5);
+
+    // Test 6: Sequential values test
+    int[] A6 = alloc_array(int, 1000);
+    for (int i = 0; i < 1000; i++) 
+        A6[i] = i;
+    int[] R6 = array_part(A6, 500, 503);
+    assert(R6[0] == 500 && R6[1] == 501 && R6[2] == 502);
+
+    // Test 7: Check negative numbers
+    int[] A7 = alloc_array(int, 4);
+    A7[0] = -1; A7[1] = -2; A7[2] = -3; A7[3] = -4;
+    int[] R7 = array_part(A7, 1, 3);
+    assert(R7[0] == -2 && R7[1] == -3);
+
+    // Test 8: Edge values test
+    int[] A8 = alloc_array(int, 3);
+    A8[0] = 0x7FFFFFFF;    // INT_MAX
+    A8[1] = 0x80000000;    // INT_MIN
+    int[] R8 = array_part(A8, 0, 2);
+    assert(R8[0] == 0x7FFFFFFF && R8[1] == 0x80000000);
+}
+
+// Function to test error cases (should be run separately as they should fail)
+void test_error_cases()
+//@requires false;    // These tests should fail
+{
+    int[] A = alloc_array(int, 5);
+    
+    // These should trigger contract violations:
+    int[] R1 = array_part(A, -1, 3);     // lo < 0
+    int[] R2 = array_part(A, 2, 6);      // hi > length
+    int[] R3 = array_part(A, 3, 2);      // lo >= hi
+    int[] R4 = array_part(A, 5, 5);      // lo == hi
+}
+
+int main() {
+    test_array_part();
+    print("All tests passed!\n");
+    return 0;
+}

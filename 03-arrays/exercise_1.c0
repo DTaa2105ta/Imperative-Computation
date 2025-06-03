@@ -1,0 +1,18 @@
+// lo: included
+// hi: excluded
+int[] array_part(int[] A, int lo, int hi)
+//@requires 0 <= lo && hi <= \length(A) && lo < hi;
+//@ensures \length(\result) == hi - lo;
+{
+    int n = hi - lo;
+    int[] A_part = alloc_array(int, n);
+    int c = lo;
+    for (int i = 0; i < n; i++)
+    //@loop_invariant(0 <= i && i <= n);
+    {
+        A_part[i] = A[c];
+        c = c + 1;
+    }
+    //@assert c == hi;
+    return A_part;
+}
