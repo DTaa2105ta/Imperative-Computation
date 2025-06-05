@@ -6,6 +6,11 @@
 !exercise_*.c0
 !.gitignore
 
+!/scavhunt/
+/scavhunt/*
+!/scavhunt/*.c0
+!/scavhunt/README.txt
+
 # Allow test files
 !*_test.c0
 !tests/
