@@ -31,7 +31,50 @@ int main() {
   /***************/
   /* tests for g */
   /***************/
+  // Basic cases
+  assert(g("abc") == 0);
+  assert(g("abac") == 2);
+  assert(g("abaac") == 3);
+  
+  // Edge cases
+  assert(g("ab") == 0);
+  assert(g("abcd") == 0);
+  assert(g("ababc") == 2);
+  assert(g("aabbc") == 1);
+  
+  // Tricky patterns
+  assert(g("aaabc") == 2);
+  assert(g("ababd") == 2);
+  assert(g("aabac") == 1);
+  assert(g("aabacb") == 1);
 
+  
+  // Long strings
+  assert(g("abbabaab") == 3);
+  assert(g("abcadefaghg") == 3);
+  assert(g("aaaaaaaab") == 7);
+  assert(g("abcdaefagh") == 4);
+
+  // Contract checking (will be checked by runtime)
+  string test1 = "abcdefg";
+  string test2 = "aaaaab";
+  string test3 = "abababc";
+  string test4 = "a12a45a78b";
+  
+  g(test1); // First/last different
+  g(test2); // Multiple same chars
+  g(test3); // Alternating pattern  
+  g(test4); // Numbers included
+  
+  // Boundary cases
+  assert(g("az") == 0);
+  assert(g("aaz") == 1);
+  assert(g("aaaz") == 2);
+  
+  // Special patterns
+  assert(g("a123a4z") == 4);
+  assert(g("abcabcz") == 3);
+  assert(g("xyaxyaz") == 3);
   /***************/
   /* tests for h */
   /***************/
