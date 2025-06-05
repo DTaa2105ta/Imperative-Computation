@@ -78,7 +78,145 @@ int main() {
   /***************/
   /* tests for h */
   /***************/
+  
+  // Short string cases (less than 128)
+  assert(string_equal(h("abc"), ""));
+  assert(string_equal(h("a"), ""));
+  assert(string_equal(h(""), ""));
+  
+  // Edge cases for long strings (>= 128 chars)
+  string long_str1 = "";
+  for(int i = 0; i < 130; i++) {
+    long_str1 = string_join(long_str1, "a");
+  }
+  string result1 = h(long_str1);
+  assert(string_length(result1) > 1);
+  assert(string_charat(result1, 0) == string_charat(result1, string_length(result1)-1));
+  
+  // String with repeated patterns
+  string long_str2 = "";
+  for(int i = 0; i < 64; i++) {
+    long_str2 = string_join(long_str2, "ab");
+  }
+  string result2 = h(long_str2);
+  assert(is_substring(result2, long_str2));
+  
+  // Mixed content strings
+  string test5 = string_join("abc", "def123abc");  // Has substring with same start/end
+  string test6 = string_join("xyz", "123xyz456"); // Has substring with same start/end
+  h(test5);
+  h(test6);
+  
+  // Contract checking without asserts - Individual cases
+  h("a");                    // Single char
+  h("aa");                   // Two same chars
+  h("aba");                 // Palindrome
+  h("abcba");              // Longer palindrome
+  h("12321");              // Numbers palindrome
+  h("#@#");                // Special chars
+  h("");                   // Empty string
+  
+  // Additional tricky cases
+  h("aaaaaaaaa");         // Repeated chars
+  h("abcdefabcdef");      // Repeated pattern
+  h("a1b2c3a");          // Mixed alphanumeric
+  h("!@#$%^&*()");       // Special characters
+  
+  // Long string with special patterns
+  string special = "";
+  for(int i = 0; i < 150; i++) {
+    if (i % 3 == 0) special = string_join(special, "x");
+    else if (i % 3 == 1) special = string_join(special, "y");
+    else special = string_join(special, "z");
+  }
+  h(special);  // Should find a substring with same first/last char
+  
+  // Test boundary conditions for long strings
+  string almost_128 = "";
+  for(int i = 0; i < 127; i++) {
+    almost_128 = string_join(almost_128, "x");
+  }
+  h(almost_128);  // Just under 128 chars
+  
+  string exactly_128 = string_join(almost_128, "x");
+  h(exactly_128); // Exactly 128 chars
+  
+  // Test substring property explicitly
+  string test_substr = h("abcabcabcabc");
+  assert(is_substring(test_substr, "abcabcabcabc"));
 
+  // Test exactly at boundary (128 chars)
+  string exact_128 = "";
+  for(int i = 0; i < 128; i++) {
+    exact_128 = string_join(exact_128, i % 2 == 0 ? "a" : "b");
+  }
+  string result_128 = h(exact_128);
+  assert(string_length(result_128) > 1);
+  assert(string_charat(result_128, 0) == string_charat(result_128, string_length(result_128)-1));
+  assert(is_substring(result_128, exact_128));
+
+  // Test with repeating pattern at boundaries
+  string pattern_str = "";
+  for(int i = 0; i < 126; i++) {
+    pattern_str = string_join(pattern_str, "x");
+  }
+  pattern_str = string_join(pattern_str, "aba"); // Makes it 129 chars with pattern at boundary
+  string result_pattern = h(pattern_str);
+  assert(string_length(result_pattern) > 1);
+  assert(string_charat(result_pattern, 0) == string_charat(result_pattern, string_length(result_pattern)-1));
+  
+  // Test with same char at start/end but different in middle
+  string sandwich = "";
+  for(int i = 0; i < 128; i++) {
+    if (i == 0 || i == 127) sandwich = string_join(sandwich, "a");
+    else sandwich = string_join(sandwich, "b");
+  }
+  string result_sandwich = h(sandwich);
+  assert(string_length(result_sandwich) > 1);
+  assert(string_charat(result_sandwich, 0) == string_charat(result_sandwich, string_length(result_sandwich)-1));
+
+  // Test with alternating patterns
+  string complex = "";
+  for(int i = 0; i < 130; i++) {
+    if (i % 7 == 0) complex = string_join(complex, "a");
+    else if (i % 7 == 1) complex = string_join(complex, "b");
+    else if (i % 7 == 2) complex = string_join(complex, "c");
+    else if (i % 7 == 3) complex = string_join(complex, "a");
+    else if (i % 7 == 4) complex = string_join(complex, "d");
+    else if (i % 7 == 5) complex = string_join(complex, "e");
+    else complex = string_join(complex, "a");
+  }
+  string result_complex = h(complex);
+  assert(string_length(result_complex) > 1);
+  assert(string_charat(result_complex, 0) == string_charat(result_complex, string_length(result_complex)-1));
+
+  // Test with special characters and numbers
+  string mixed = "";
+  for(int i = 0; i < 128; i++) {
+    if (i % 5 == 0) mixed = string_join(mixed, "#");
+    else if (i % 5 == 1) mixed = string_join(mixed, "@");
+    else if (i % 5 == 2) mixed = string_join(mixed, "1");
+    else if (i % 5 == 3) mixed = string_join(mixed, "2");
+    else mixed = string_join(mixed, "#");
+  }
+  string result_mixed = h(mixed);
+  assert(string_length(result_mixed) > 1);
+  assert(string_charat(result_mixed, 0) == string_charat(result_mixed, string_length(result_mixed)-1));
+
+  // Test with palindrome pattern
+  string palindrome = "";
+  for(int i = 0; i < 64; i++) {
+    palindrome = string_join(palindrome, "a");
+  }
+  for(int i = 0; i < 64; i++) {
+    palindrome = string_join(palindrome, "b");
+  }
+  for(int i = 0; i < 64; i++) {
+    palindrome = string_join(palindrome, "a");
+  }
+  string result_palindrome = h(palindrome);
+  assert(string_length(result_palindrome) > 1);
+  assert(string_charat(result_palindrome, 0) == string_charat(result_palindrome, string_length(result_palindrome)-1));
 
   printf("All tests passed!");
   return 0;

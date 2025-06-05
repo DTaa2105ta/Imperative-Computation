@@ -52,13 +52,11 @@ int g(string s)
   for (int i = 1; i < len - 1; i++)
   //@loop_invariant  1 <= i && i <= len-1;
   {
-      if (string_charat(s, i) == string_charat(s, 0)) 
-      {
-          if (string_charat(s, i+1) != string_charat(s, 0)) 
-          {
-              return i;
-          }
-      }
+    if (string_charat(s, i) == string_charat(s, 0) 
+    &&  string_charat(s, i+1) != string_charat(s, 0))
+    {
+        return i;
+    }
   }
   return 0;
 }
@@ -70,6 +68,22 @@ string h(string s)
             && string_charat(\result, 0)
                == string_charat(\result, string_length(\result) - 1)); @*/
 {
+  int len = string_length(s);
+  if (len >= 128) 
+  {
+    int last_char_index = len - 1;
+    for (int i = 0; i < len - 1; i++)
+    //@loop_invariant 0 <= i && i <= len - 1;
+    {
+      for (int j = i + 1; j < len; j++)
+      //@loop_invariant i < j && j <= len;
+      {
+        if (string_charat(s, i) == string_charat(s, j)) {
+          return string_sub(s, i, j+1);
+        }
+      }
+    }
+  }
   return "";
 }
 
