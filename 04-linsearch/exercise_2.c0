@@ -1,0 +1,36 @@
+void doubling(int[] A, int[] B, int n)
+//@requires n*2 <= int_max();
+//@requires \length(A) == n && \length(B) == 2*n;
+{
+    for (int i = 0; i < n; i++)
+    //@loop_invariant 0 <= i && i <= n;
+    {
+        B[2*i] = A[i];
+        B[2*i + 1] = A[i];
+    }
+}
+
+/*
+1. Rewrite this precondition so that it actually achieves the intended constraints on the value of n.
+    //@requires n <= int_max()/2;
+    //@requires  \length(A) == n && \length(B) == 2*n;
+2.
+    i < n;
+    n <= int_max()/2;
+    2*i + 1 < 2*(int_max()/2) + 1;
+    2*i + 1 < int_max() + 1;
+    then 
+    2*i + 1 <= int_max(); (int safe)
+
+    int i = 0;
+    0 <= i;
+    then 
+    2*i + 1 >= 1; 
+    i < n;
+    i <= n - 1;
+    then
+    2*i + 1 <= 2*(n-1) + 1;
+    2*i + 1 <= 2*n - 1;
+    2*i + 1 < 2*n;
+    2*i + 1 < \length(B); (length safe)
+*/

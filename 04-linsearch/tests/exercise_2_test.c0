@@ -1,0 +1,116 @@
+#use <conio>
+#use <util>
+#use "../exercise_2.c0"
+
+void test_basic() {
+    int[] A = alloc_array(int, 3);
+    int[] B = alloc_array(int, 6);
+    A[0] = 1; A[1] = 2; A[2] = 3;
+    
+    doubling(A, B, 3);
+    assert(B[0] == 1 && B[1] == 1);
+    assert(B[2] == 2 && B[3] == 2);
+    assert(B[4] == 3 && B[5] == 3);
+}
+
+void test_zero() {
+    int[] A = alloc_array(int, 1);
+    int[] B = alloc_array(int, 2);
+    A[0] = 0;
+    
+    doubling(A, B, 1);
+    assert(B[0] == 0 && B[1] == 0);
+}
+
+void test_negative() {
+    int[] A = alloc_array(int, 2);
+    int[] B = alloc_array(int, 4);
+    A[0] = -1; A[1] = -2;
+    
+    doubling(A, B, 2);
+    assert(B[0] == -1 && B[1] == -1);
+    assert(B[2] == -2 && B[3] == -2);
+}
+
+void test_edge_values() {
+    int[] A = alloc_array(int, 2);
+    int[] B = alloc_array(int, 4);
+    A[0] = int_max();
+    A[1] = int_min();
+    
+    doubling(A, B, 2);
+    assert(B[0] == int_max() && B[1] == int_max());
+    assert(B[2] == int_min() && B[3] == int_min());
+}
+
+void test_empty() {
+    int[] A = alloc_array(int, 0);
+    int[] B = alloc_array(int, 0);
+    
+    doubling(A, B, 0);
+    // If we reach here, test passed (no out of bounds access)
+}
+
+// Test alternating positive and negative numbers
+void test_alternating() {
+    int[] A = alloc_array(int, 4);
+    int[] B = alloc_array(int, 8);
+    A[0] = 1; A[1] = -2; A[2] = 3; A[3] = -4;
+    
+    doubling(A, B, 4);
+    assert(B[0] == 1 && B[1] == 1);
+    assert(B[2] == -2 && B[3] == -2);
+    assert(B[4] == 3 && B[5] == 3);
+    assert(B[6] == -4 && B[7] == -4);
+}
+
+// Test with large array size that's within C0 runtime limits
+void test_max_size() {
+    int n = 1000000;  // 1 million elements
+    int[] A = alloc_array(int, n);
+    int[] B = alloc_array(int, 2*n);
+    A[0] = 42; A[n-1] = 24;  // Test first and last elements
+    
+    doubling(A, B, n);
+    assert(B[0] == 42 && B[1] == 42);
+    assert(B[2*n-2] == 24 && B[2*n-1] == 24);
+}
+
+// Test with moderately large indices
+void test_large_indices() {
+    int n = 500000;  // 500k elements
+    int[] A = alloc_array(int, n);
+    int[] B = alloc_array(int, 2*n);
+    A[n-1] = 99;  // Test last element
+    
+    doubling(A, B, n);
+    assert(B[2*n-2] == 99 && B[2*n-1] == 99);
+}
+
+// Test array with all maximum integer values
+void test_all_max_values() {
+    int[] A = alloc_array(int, 3);
+    int[] B = alloc_array(int, 6);
+    A[0] = int_max();
+    A[1] = int_max();
+    A[2] = int_max();
+    
+    doubling(A, B, 3);
+    for(int i = 0; i < 6; i++) {
+        assert(B[i] == int_max());
+    }
+}
+int main() {
+    test_basic();
+    test_zero();
+    test_negative();
+    test_edge_values();
+    test_empty();
+    test_alternating();
+    test_max_size();
+    test_large_indices();
+    test_all_max_values();
+    
+    println("All tests passed!");
+    return 0;
+}

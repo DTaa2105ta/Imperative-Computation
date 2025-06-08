@@ -1,0 +1,64 @@
+#use <conio>
+#use "../exercise_1.c0"
+
+void test_find_max() {
+    // Basic test - single element
+    int[] A1 = alloc_array(int, 1);
+    A1[0] = 5;
+    assert(find_max(A1, 1) == 0);
+    
+    // All same elements
+    int[] A2 = alloc_array(int, 4);
+    for(int i = 0; i < 4; i++) A2[i] = 5;
+    assert(find_max(A2, 4) == 0);
+    
+    // Max at different positions
+    int[] A3 = alloc_array(int, 5);
+    A3[0] = 10; A3[1] = 2; A3[2] = 3; A3[3] = 4; A3[4] = 5;
+    assert(find_max(A3, 5) == 0);  // max at start
+    
+    int[] A4 = alloc_array(int, 5);
+    A4[0] = 1; A4[1] = 2; A4[2] = 3; A4[3] = 4; A4[4] = 10;
+    assert(find_max(A4, 5) == 4);  // max at end
+    
+    int[] A5 = alloc_array(int, 5);
+    A5[0] = 1; A5[1] = 2; A5[2] = 10; A5[3] = 4; A5[4] = 5;
+    assert(find_max(A5, 5) == 2);  // max in middle
+    
+    // Edge cases with extreme values
+    int[] A6 = alloc_array(int, 3);
+    A6[0] = 0x7FFFFFFF;  // INT_MAX
+    A6[1] = 0;
+    A6[2] = -1;
+    assert(find_max(A6, 3) == 0);
+    
+    int[] A7 = alloc_array(int, 3);
+    A7[0] = 0x80000000;  // INT_MIN
+    A7[1] = 0;
+    A7[2] = -1;
+    assert(find_max(A7, 3) == 1);
+    
+    // Multiple occurrences of maximum
+    int[] A8 = alloc_array(int, 5);
+    A8[0] = 1; A8[1] = 3; A8[2] = 2; A8[3] = 3; A8[4] = 1;
+    assert(find_max(A8, 5) == 1);  // should return first occurrence
+    
+    // Sequences
+    int[] A9 = alloc_array(int, 5);
+    A9[0] = 1; A9[1] = 2; A9[2] = 3; A9[3] = 4; A9[4] = 5;
+    assert(find_max(A9, 5) == 4);  // ascending
+    
+    int[] A10 = alloc_array(int, 5);
+    A10[0] = 5; A10[1] = 4; A10[2] = 3; A10[3] = 2; A10[4] = 1;
+    assert(find_max(A10, 5) == 0);  // descending
+    
+    int[] A11 = alloc_array(int, 5);
+    A11[0] = 1; A11[1] = 5; A11[2] = 2; A11[3] = 4; A11[4] = 3;
+    assert(find_max(A11, 5) == 1);  // alternating
+}
+
+int main() {
+    test_find_max();
+    print("All tests passed!\n");
+    return 0;
+}
