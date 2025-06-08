@@ -1,0 +1,134 @@
+#use <conio>
+#use <util>
+#use "../arrayutil.c0"
+#use "../exercise_3.c0"
+
+// Test basic search functionality
+void test_basic() {
+    int[] A = alloc_array(int, 5);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 4; A[4] = 5;
+    
+    assert(search(3, A, 0, 5) == 2);        // Normal case
+    assert(search(1, A, 0, 5) == 0);        // First element
+    assert(search(5, A, 0, 5) == 4);        // Last element
+    assert(search(6, A, 0, 5) == -1);       // Not found
+}
+
+// Test searching in subarrays
+void test_subarray() {
+    int[] A = alloc_array(int, 8);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 2; 
+    A[4] = 3; A[5] = 4; A[6] = 2; A[7] = 5;
+    
+    assert(search(2, A, 1, 4) == 1);        // Search in middle subarray
+    assert(search(2, A, 5, 8) == 6);        // Search in later subarray
+    assert(search(1, A, 1, 8) == -1);       // Element exists but not in search range
+}
+
+// Test with duplicate elements
+void test_duplicates() {
+    int[] A = alloc_array(int, 6);
+    A[0] = 2; A[1] = 2; A[2] = 2; A[3] = 2; A[4] = 2; A[5] = 2;
+    
+    assert(search(2, A, 0, 6) == 0);        // Should return first occurrence
+    assert(search(2, A, 3, 6) == 3);        // First occurrence in subarray
+}
+
+// Test edge cases
+void test_edge_cases() {
+    int[] A = alloc_array(int, 10);
+    A[0] = int_max();
+    A[1] = int_min();
+    A[2] = 0;
+    
+    assert(search(int_max(), A, 0, 3) == 0);    // Maximum integer
+    assert(search(int_min(), A, 0, 3) == 1);    // Minimum integer
+    assert(search(0, A, 0, 3) == 2);            // Zero
+}
+
+// Test minimal subarrays
+void test_minimal_range() {
+    int[] A = alloc_array(int, 5);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 4; A[4] = 5;
+    
+    assert(search(2, A, 1, 2) == 1);        // Single element search range
+    assert(search(3, A, 2, 3) == 2);        // Single element search range
+    assert(search(1, A, 1, 2) == -1);       // Element exists but not in minimal range
+}
+
+// Test boundary conditions
+void test_boundaries() {
+    int[] A = alloc_array(int, 100);
+    for (int i = 0; i < 100; i++) {
+        A[i] = i;
+    }
+    
+    assert(search(98, A, 98, 99) == 98);    // Search near array end
+    assert(search(98, A, 0, 99) == 98);     // Search in full range
+    assert(search(98, A, 99, 100) == -1);   // Search in last position only
+}
+
+// Test with alternating patterns
+void test_alternating_pattern() {
+    int[] A = alloc_array(int, 8);
+    A[0] = 1; A[1] = -1; A[2] = 1; A[3] = -1;
+    A[4] = 1; A[5] = -1; A[6] = 1; A[7] = -1;
+    
+    assert(search(1, A, 2, 5) == 2);      // First occurrence in range
+    assert(search(-1, A, 0, 8) == 1);     // First negative in full range
+    assert(search(1, A, 5, 8) == 6);      // Pattern continues in later range
+}
+
+// Test with sparse array (mostly zeros)
+void test_sparse_array() {
+    int[] A = alloc_array(int, 20);
+    // Set specific positions to non-zero
+    A[0] = 0; A[5] = 42; A[10] = 0; A[15] = 42; A[19] = 0;
+    
+    assert(search(42, A, 0, 10) == 5);    // First occurrence
+    assert(search(42, A, 6, 20) == 15);   // Second occurrence
+    assert(search(42, A, 16, 20) == -1);  // Not in final segment
+}
+
+// Test with consecutive ranges
+void test_consecutive_ranges() {
+    int[] A = alloc_array(int, 10);
+    A[0] = 5; A[1] = 5; A[2] = 5; 
+    A[3] = 6; A[4] = 6; A[5] = 6;
+    A[6] = 7; A[7] = 7; A[8] = 7; A[9] = 7;
+    
+    assert(search(5, A, 0, 3) == 0);      // First group
+    assert(search(6, A, 2, 6) == 3);      // Middle group
+    assert(search(7, A, 5, 10) == 6);     // Last group
+    assert(search(5, A, 3, 10) == -1);    // Value exists but not in range
+}
+
+// Test with interleaved sequences
+void test_interleaved() {
+    int[] A = alloc_array(int, 12);
+    // Create sequence: 1,10,2,20,3,30,4,40,5,50,6,60
+    for(int i = 0; i < 6; i++) {
+        A[2*i] = i+1;
+        A[2*i+1] = (i+1)*10;
+    }
+    
+    assert(search(30, A, 0, 12) == 5);    // Middle element
+    assert(search(4, A, 6, 9) == 6);      // Small number in range
+    assert(search(50, A, 3, 11) == 9);    // Large number in range
+}
+
+int main() {
+    test_basic();
+    test_subarray();
+    test_duplicates();
+    test_edge_cases();
+    test_minimal_range();
+    test_boundaries();
+    test_alternating_pattern();
+    test_sparse_array();
+    test_consecutive_ranges();
+    test_interleaved();
+    
+    println("All tests passed!");
+    return 0;
+}

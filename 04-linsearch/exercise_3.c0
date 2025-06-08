@@ -1,0 +1,47 @@
+int search(int x, int[] A, int lo, int hi)
+//@requires 0 <= lo && lo < hi && hi <= \length(A);
+/*@ensures (\result == -1 && !is_in(x, A, lo, hi))
+        || (lo <= \result && \result < hi && A[\result] == x);
+@*/
+{
+    for (int i = lo; i < hi; i++)
+    //@loop_invariant lo <= i && i <= hi;
+    //@loop_invariant !is_in(x, A, lo, i);
+    {
+        if (A[i] == x) 
+            return i;
+    }
+    //@assert !is_in(x, A, lo, hi); 
+    return -1; 
+}
+
+/*
+
+When we return from the function using the statement on line 12, we have to
+prove the second part of the postcondition: (lo <= \result &&
+\result < hi && A[\result] == x). Prove that this postcondition
+is correct.
+
+Line 8: lo <= i
+Line 12: \result == i
+lo < = \result (Line 12, Line 8)
+
+Line 7: i < hi
+\result < hi (Line 12, Line 7)
+
+Line 11: A[i] == x
+A[\result] == x (Line 12, Line 11)
+
+lo <= \result && \result < hi && A[\result] == x 
+
+*/
+
+/*
+
+Line 8: i <= hi
+Line 7: i >= hi (we are out of the loop to meet assertion on line 14)
+i == hi (Line 7, Line 8)
+Line 9: !is_in(x, A, lo, i)
+!is_in(x, A, lo, hi) (Line 9 and i == hi)
+
+*/
