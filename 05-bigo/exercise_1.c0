@@ -1,0 +1,74 @@
+int function1(int[] A, int n)
+//@requires n == \length(A);
+{
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            count = count + A[j] * (i-1);
+        }
+    }
+    return count;
+}
+/*
+bigO analysis of function1:
+
+Step 1: Identify the input size
+- Input size is 'n' (the length of array A)
+
+Step 2: Analyze each operation/loop
+- Outer loop: runs from i = 0 to i = n - 1
+  -> executes n times
+- Inner loop: runs from j = 0 to j = n - 1 
+  -> executes n times for EACH iteration of outer loop
+- Inside inner loop: count = count + A[j] * (i-1)
+  -> constant time operation O(1)
+
+Step 3: Calculate total operations
+- Inner loop body executes: n × n = n² times
+- Each execution does O(1) work
+- Total: n² × O(1) = O(n²)
+
+ANSWER: O(n²) - Quadratic time complexity
+*/
+
+int function2(int[] A, int n)
+//@requires (n == \length(A));
+{
+    int count = n;
+    int k = 5;
+    for (int i = 0; i < k; i++) {
+        for (int j = 0; j < k; j++) {
+            count = count + i * (j+1);
+        }
+    }
+    return count;
+}
+/*
+bigO analysis of function2:
+
+Step 1: Identify the input size
+- Input size is 'n' (the length of array A)
+
+Step 2: Analyze each operation/loop
+- Initial operations: int count = n; int k = 5;
+  -> O(1) constant time operations
+- Outer loop: runs from i = 0 to i = k - 1, where k = 5
+  -> executes exactly 5 times (CONSTANT, not dependent on n)
+- Inner loop: runs from j = 0 to i = k - 1, where k = 5
+  -> executes exactly 5 times for EACH iteration of outer loop
+- Inside inner loop: count = count + i * (j+1)
+  -> constant time operation O(1)
+
+Step 3: Calculate total operations
+- Inner loop body executes: 5 × 5 = 25 times (CONSTANT)
+- Each execution does O(1) work
+- Total: 25 × O(1) = O(1)
+
+Step 4: Key insight
+- The loops depend on k (which is 5), NOT on n
+- Even though we have nested loops, they run a FIXED number of times
+- The variable 'n' only appears in the initialization (count = n)
+- This is a constant time operation regardless of n's value
+
+ANSWER: O(1) - Constant time complexity
+*/
