@@ -11,6 +11,9 @@
 !/scavhunt/*.c0
 !/scavhunt/README.txt
 
+# Allow utility files
+!*util.c0
+!*utils.c0
 # Allow test files
 !*_test.c0
 !tests/
