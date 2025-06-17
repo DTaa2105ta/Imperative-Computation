@@ -1,0 +1,266 @@
+#use <conio>
+#use "../arrayutil.c0"
+#use "../exercise_6.c0"
+
+// Helper function to create and fill array
+int[] create_array(int size, int[] values) {
+    int[] A = alloc_array(int, size);
+    for (int i = 0; i < size; i++) {
+        A[i] = values[i];
+    }
+    return A;
+}
+
+// Helper function to verify array contents
+bool arrays_equal(int[] A, int[] B, int size) {
+    for (int i = 0; i < size; i++) {
+        if (A[i] != B[i]) return false;
+    }
+    return true;
+}
+
+void test_edge_cases() {
+    print("Testing edge cases...\n");
+    
+    // Test 1: Empty array (n = 0)
+    int[] A1 = alloc_array(int, 5);
+    insertSort(A1, 0);  // Should do nothing
+    assert(true);  // No crash = success
+    
+    // Test 2: Single element
+    int[] vals2 = alloc_array(int, 1);
+    vals2[0] = 42;
+    int[] A2 = create_array(1, vals2);
+    insertSort(A2, 1);
+    assert(is_sorted(A2, 0, 1));
+    assert(A2[0] == 42);
+    
+    // Test 3: Two elements - already sorted
+    int[] vals3 = alloc_array(int, 2);
+    vals3[0] = 1; vals3[1] = 2;
+    int[] A3 = create_array(2, vals3);
+    insertSort(A3, 2);
+    assert(is_sorted(A3, 0, 2));
+    assert(A3[0] == 1 && A3[1] == 2);
+    
+    // Test 4: Two elements - reverse sorted
+    int[] vals4 = alloc_array(int, 2);
+    vals4[0] = 2; vals4[1] = 1;
+    int[] A4 = create_array(2, vals4);
+    insertSort(A4, 2);
+    assert(is_sorted(A4, 0, 2));
+    assert(A4[0] == 1 && A4[1] == 2);
+}
+
+void test_extreme_values() {
+    print("Testing extreme values...\n");
+    
+    // Test 1: Maximum and minimum integers
+    int[] vals1 = alloc_array(int, 3);
+    vals1[0] = 0x7FFFFFFF;  // INT_MAX
+    vals1[1] = 0x80000000;  // INT_MIN
+    vals1[2] = 0;
+    int[] A1 = create_array(3, vals1);
+    insertSort(A1, 3);
+    assert(is_sorted(A1, 0, 3));
+    assert(A1[0] == 0x80000000);  // INT_MIN should be first
+    assert(A1[1] == 0);
+    assert(A1[2] == 0x7FFFFFFF);  // INT_MAX should be last
+    
+    // Test 2: All maximum values
+    int[] vals2 = alloc_array(int, 4);
+    for (int i = 0; i < 4; i++) vals2[i] = 0x7FFFFFFF;
+    int[] A2 = create_array(4, vals2);
+    insertSort(A2, 4);
+    assert(is_sorted(A2, 0, 4));
+    for (int i = 0; i < 4; i++) assert(A2[i] == 0x7FFFFFFF);
+    
+    // Test 3: All minimum values
+    int[] vals3 = alloc_array(int, 4);
+    for (int i = 0; i < 4; i++) vals3[i] = 0x80000000;
+    int[] A3 = create_array(4, vals3);
+    insertSort(A3, 4);
+    assert(is_sorted(A3, 0, 4));
+    for (int i = 0; i < 4; i++) assert(A3[i] == 0x80000000);
+}
+
+void test_duplicate_elements() {
+    print("Testing arrays with duplicates...\n");
+    
+    // Test 1: All same elements
+    int[] vals1 = alloc_array(int, 6);
+    for (int i = 0; i < 6; i++) vals1[i] = 5;
+    int[] A1 = create_array(6, vals1);
+    insertSort(A1, 6);
+    assert(is_sorted(A1, 0, 6));
+    for (int i = 0; i < 6; i++) assert(A1[i] == 5);
+    
+    // Test 2: Multiple duplicates scattered
+    int[] vals2 = alloc_array(int, 8);
+    vals2[0] = 3; vals2[1] = 1; vals2[2] = 4; vals2[3] = 1;
+    vals2[4] = 5; vals2[5] = 9; vals2[6] = 2; vals2[7] = 6;
+    int[] A2 = create_array(8, vals2);
+    insertSort(A2, 8);
+    assert(is_sorted(A2, 0, 8));
+    // Should be: 1, 1, 2, 3, 4, 5, 6, 9
+    assert(A2[0] == 1 && A2[1] == 1 && A2[2] == 2);
+    
+    // Test 3: Alternating pattern with duplicates
+    int[] vals3 = alloc_array(int, 6);
+    vals3[0] = 2; vals3[1] = 1; vals3[2] = 2; 
+    vals3[3] = 1; vals3[4] = 2; vals3[5] = 1;
+    int[] A3 = create_array(6, vals3);
+    insertSort(A3, 6);
+    assert(is_sorted(A3, 0, 6));
+    // Should be: 1, 1, 1, 2, 2, 2
+    for (int i = 0; i < 3; i++) assert(A3[i] == 1);
+    for (int i = 3; i < 6; i++) assert(A3[i] == 2);
+}
+
+void test_pathological_cases() {
+    print("Testing pathological cases...\n");
+    
+    // Test 1: Reverse sorted array (worst case for insertion sort)
+    int[] vals1 = alloc_array(int, 7);
+    vals1[0] = 7; vals1[1] = 6; vals1[2] = 5; vals1[3] = 4;
+    vals1[4] = 3; vals1[5] = 2; vals1[6] = 1;
+    int[] A1 = create_array(7, vals1);
+    insertSort(A1, 7);
+    assert(is_sorted(A1, 0, 7));
+    for (int i = 0; i < 7; i++) assert(A1[i] == i + 1);
+    
+    // Test 2: Mountain pattern (up then down)
+    int[] vals2 = alloc_array(int, 7);
+    vals2[0] = 1; vals2[1] = 3; vals2[2] = 5; vals2[3] = 7;
+    vals2[4] = 6; vals2[5] = 4; vals2[6] = 2;
+    int[] A2 = create_array(7, vals2);
+    insertSort(A2, 7);
+    assert(is_sorted(A2, 0, 7));
+    
+    // Test 3: Valley pattern (down then up)
+    int[] vals3 = alloc_array(int, 7);
+    vals3[0] = 7; vals3[1] = 5; vals3[2] = 3; vals3[3] = 1;
+    vals3[4] = 2; vals3[5] = 4; vals3[6] = 6;
+    int[] A3 = create_array(7, vals3);
+    insertSort(A3, 7);
+    assert(is_sorted(A3, 0, 7));
+    
+    // Test 4: Nearly sorted with one element out of place
+    int[] vals4 = alloc_array(int, 8);
+    vals4[0] = 1; vals4[1] = 2; vals4[2] = 3; vals4[3] = 4;
+    vals4[4] = 5; vals4[5] = 6; vals4[6] = 8; vals4[7] = 7;  // 8,7 swapped
+    int[] A4 = create_array(8, vals4);
+    insertSort(A4, 8);
+    assert(is_sorted(A4, 0, 8));
+    for (int i = 0; i < 8; i++) assert(A4[i] == i + 1);
+}
+
+void test_zero_and_negative() {
+    print("Testing arrays with zero and negative numbers...\n");
+    
+    // Test 1: Mix of positive, negative, and zero
+    int[] vals1 = alloc_array(int, 9);
+    vals1[0] = -5; vals1[1] = 3; vals1[2] = 0; vals1[3] = -2;
+    vals1[4] = 7; vals1[5] = -8; vals1[6] = 1; vals1[7] = 0; vals1[8] = -1;
+    int[] A1 = create_array(9, vals1);
+    insertSort(A1, 9);
+    assert(is_sorted(A1, 0, 9));
+    // Should be: -8, -5, -2, -1, 0, 0, 1, 3, 7
+    assert(A1[0] == -8);
+    assert(A1[8] == 7);
+    
+    // Test 2: All negative numbers
+    int[] vals2 = alloc_array(int, 5);
+    vals2[0] = -1; vals2[1] = -5; vals2[2] = -3; vals2[3] = -2; vals2[4] = -4;
+    int[] A2 = create_array(5, vals2);
+    insertSort(A2, 5);
+    assert(is_sorted(A2, 0, 5));
+    // Should be: -5, -4, -3, -2, -1
+    for (int i = 0; i < 5; i++) assert(A2[i] == -(5-i));
+    
+    // Test 3: Only zeros
+    int[] vals3 = alloc_array(int, 4);
+    for (int i = 0; i < 4; i++) vals3[i] = 0;
+    int[] A3 = create_array(4, vals3);
+    insertSort(A3, 4);
+    assert(is_sorted(A3, 0, 4));
+    for (int i = 0; i < 4; i++) assert(A3[i] == 0);
+}
+
+void test_partial_sorting() {
+    print("Testing partial array sorting...\n");
+    
+    // Test 1: Sort only first part of array
+    int[] A1 = alloc_array(int, 10);
+    A1[0] = 5; A1[1] = 3; A1[2] = 8; A1[3] = 1; A1[4] = 7;
+    A1[5] = 999; A1[6] = 888; A1[7] = 777; A1[8] = 666; A1[9] = 555;
+    insertSort(A1, 5);  // Only sort first 5 elements
+    assert(is_sorted(A1, 0, 5));
+    // Elements 5-9 should be unchanged
+    assert(A1[5] == 999 && A1[6] == 888 && A1[7] == 777);
+    
+    // Test 2: Sort middle portion (using larger array, sort subset)
+    int[] A2 = alloc_array(int, 8);
+    for (int i = 0; i < 8; i++) A2[i] = 8 - i;  // 8,7,6,5,4,3,2,1
+    insertSort(A2, 6);  // Sort first 6: should get 2,3,4,5,6,7,8,1
+    assert(is_sorted(A2, 0, 6));
+    assert(A2[6] == 2);  // Original A2[6] should be unchanged
+    assert(A2[7] == 1);  // Original A2[7] should be unchanged
+}
+
+void test_stability() {
+    print("Testing stability (relative order of equal elements)...\n");
+    
+    // Since we can't easily test stability with just integers,
+    // we test that duplicates end up in a valid sorted order
+    int[] vals = alloc_array(int, 10);
+    vals[0] = 3; vals[1] = 1; vals[2] = 4; vals[3] = 1; vals[4] = 5;
+    vals[5] = 9; vals[6] = 2; vals[7] = 6; vals[8] = 5; vals[9] = 3;
+    int[] A = create_array(10, vals);
+    insertSort(A, 10);    assert(is_sorted(A, 0, 10));
+    
+    // Count occurrences to ensure no elements were lost
+    int count_1 = 0;
+    int count_3 = 0; 
+    int count_5 = 0;
+    for (int i = 0; i < 10; i++) {
+        if (A[i] == 1) count_1++;
+        else if (A[i] == 3) count_3++;
+        else if (A[i] == 5) count_5++;
+    }
+    assert(count_1 == 2 && count_3 == 2 && count_5 == 2);
+}
+
+void test_large_arrays() {
+    print("Testing larger arrays...\n");
+    
+    // Test with a moderately large array (powers of 2 pattern)
+    int[] A = alloc_array(int, 16);
+    // Fill with reverse powers of 2: 32768, 16384, ..., 2, 1
+    for (int i = 0; i < 16; i++) {
+        A[i] = 1 << (15 - i);  // 2^(15-i)
+    }
+    insertSort(A, 16);
+    assert(is_sorted(A, 0, 16));
+    
+    // Verify it's actually powers of 2 in ascending order
+    for (int i = 0; i < 16; i++) {
+        assert(A[i] == (1 << i));
+    }
+}
+
+int main() {
+    print("Starting comprehensive insertion sort tests...\n");
+    
+    test_edge_cases();
+    test_extreme_values();
+    test_duplicate_elements();
+    test_pathological_cases();
+    test_zero_and_negative();
+    test_partial_sorting();
+    test_stability();
+    test_large_arrays();
+    
+    print("All tests passed! Insertion sort is working correctly.\n");
+    return 0;
+}
