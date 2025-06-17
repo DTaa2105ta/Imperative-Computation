@@ -1,0 +1,27 @@
+/*
+- Prove log(n!) is in O(n log n)
+    since n! = n * (n-1) * ... * 2 * 1 <= n * n * ... * n (n times)= n^n
+    then log(n!) <= log(n^n) = n log n
+    Choose n0 = 3, c = 1 then for all n >= n0, log(n!) <= c * n log n
+    It must be the case that log(n!) is in O(n log n).
+
+- Prove n log n is in O(log(n!))
+
+    We need to show that there exist constants c > 0 and n0 such that n log n <= c * log(n!) for all n >= n0.
+    
+    log(n!) = log(1) + log(2) + ... + log(n)
+    Since log is an increasing function, for i >= n/2, we have log(i) >= log(n/2)
+    
+    The number of terms from n/2 to n is approximately n/2.
+    So log(n!) >= (n/2) * log(n/2) = (n/2) * (log(n) - log(2))
+    
+    For large n, log(n) - log(2) >= log(n)/2 (since log(2) is constant)
+    Therefore: log(n!) >= (n/2) * (log(n)/2) = (n * log(n))/4
+    
+    This means: n log n <= 4 * log(n!)
+    
+    Choose c = 4 and n0 = 4. Then for all n >= n0:
+    n log n <= c * log(n!)
+    
+    Therefore, n log n is in O(log(n!))
+*/
