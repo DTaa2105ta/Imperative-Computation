@@ -1,0 +1,20 @@
+/*
+f(x,y) = max(x, y)
+g(x,y) = x + y
+
+- If x >= y >= 0; f(x,y) = x then f(x,y) = x <= x + y = g(x,y) (by math)
+    Thus f(x,y) is in O(g(x,y))
+- If 0 <= x <= y; f(x,y) = y then f(x,y) = y <= y + x = g(x,y) (by math)
+    Thus f(x,y) is in O(g(x,y))
+Also
+- If x >= y >= 0; f(x,y) = x and x + y <= x + x = 2x. 
+    It must be the case that there always exist numbers x_0, y_0, c = 2 
+    such that for all x >= x_0 and y >= y_0, g(x,y) <= c . f(x,y).
+    Thus g(x,y) is in O(f(x,y)).
+- If 0<= x <= y; f(x,y) = y and x + y <= y + y = 2y. 
+    It must be the case that there always exist numbers x_0, y_0, c = 2 
+    such that for all x >= x_0 and y >= y_0, g(x,y) <= c . f(x,y).
+    Thus g(x,y) is in O(f(x,y)).
+
+f(x,y) is in O(g(x,y)) and g(x,y) is in O(f(x,y)) so O(f(x,y)) = O(g(x,y)).
+*/
