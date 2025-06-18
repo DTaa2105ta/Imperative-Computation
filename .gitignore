@@ -11,6 +11,11 @@
 !/scavhunt/*.c0
 !/scavhunt/README.txt
 
+!/pixels/
+/pixels/*
+!/pixels/*.c0
+!/pixels/README.txt
+
 # Allow utility files
 !*util.c0
 !*utils.c0
@@ -21,6 +26,7 @@
 # Ignore build artifacts and binaries
 *.out
 *.o
+*.o0
 *.exe
 
 # Ignore IDE/tool-specific files
