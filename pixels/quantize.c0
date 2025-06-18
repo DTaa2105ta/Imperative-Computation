@@ -1,0 +1,142 @@
+/* 
+The pixel interface describes the pixel type. It also defines
+five functions: get_red(p), get_green(p), get_blue(p),
+get_alpha(p), and make_pixel(a,r,g,b).  If you're *given* a
+working pixel library, you can use the pixel interface
+without knowing how pixels are represented.
+
+When writing this file, only use the pixel interface.  We'll
+check your code by compiling and running it against different
+implementations of the pixel interface.
+
+There are  tasks in this file:
+- Task 1 - Implement quantize() as described in the writeup
+- Task 2 - Testing quantize()
+*/
+
+/* Task 1 - Implement quantize() as described in the writeup */
+pixel_t quantize(pixel_t p, int q)
+//@requires 0 <= q && q <= 8;
+{
+  int q_mask = 0xFF << q;
+  return make_pixel(get_alpha(p) , (get_red(p) & q_mask), (get_green(p) & q_mask), (get_blue(p) & q_mask));
+}
+
+/* Task 2 - Testing quantize()
+
+   Write some more tests for quantize. Remember to respect the pixels
+   interface! We *will* run these tests, and will grade them based on
+   their ability to catch buggy implementations of quantize.
+*/
+
+void test_quantize() {
+  pixel_t p = quantize(make_pixel(0xFF, 0xFF, 0xFF, 0xFF), 4);
+  assert(get_alpha(p) == 0xFF);
+  assert(get_red(p)   == 0xF0);
+  assert(get_green(p) == 0xF0);
+  assert(get_blue(p)  == 0xF0);
+
+  // Edge case: q = 0 (no quantization)
+  pixel_t p1 = quantize(make_pixel(0x12, 0x34, 0x56, 0x78), 0);
+  assert(get_alpha(p1) == 0x12);
+  assert(get_red(p1) == 0x34);
+  assert(get_green(p1) == 0x56);
+  assert(get_blue(p1) == 0x78);
+
+  // Edge case: q = 8 (maximum quantization - all color bits cleared)
+  pixel_t p2 = quantize(make_pixel(0xFF, 0xFF, 0xFF, 0xFF), 8);
+  assert(get_alpha(p2) == 0xFF);
+  assert(get_red(p2) == 0x00);
+  assert(get_green(p2) == 0x00);
+  assert(get_blue(p2) == 0x00);
+
+  // Edge case: all zero pixel
+  pixel_t p3 = quantize(make_pixel(0x00, 0x00, 0x00, 0x00), 3);
+  assert(get_alpha(p3) == 0x00);
+  assert(get_red(p3) == 0x00);
+  assert(get_green(p3) == 0x00);
+  assert(get_blue(p3) == 0x00);
+
+  // Tricky case: pixel values that would be affected by specific bit patterns
+  // Testing with 0x6B (01101011) and q=5 should give 0x60 (01100000)
+  pixel_t p4 = quantize(make_pixel(0xAB, 0x6B, 0x6B, 0x6B), 5);
+  assert(get_alpha(p4) == 0xAB);
+  assert(get_red(p4) == 0x60);
+  assert(get_green(p4) == 0x60);
+  assert(get_blue(p4) == 0x60);
+
+  // Testing boundary between cleared and preserved bits
+  // 0x87 (10000111) with q=3 should give 0x80 (10000000)
+  pixel_t p5 = quantize(make_pixel(0xFF, 0x87, 0x87, 0x87), 3);
+  assert(get_alpha(p5) == 0xFF);
+  assert(get_red(p5) == 0x80);
+  assert(get_green(p5) == 0x80);
+  assert(get_blue(p5) == 0x80);
+
+  // Testing with alternating bit pattern
+  // 0xAA (10101010) with q=1 should give 0xAA (10101010)
+  // 0xAA (10101010) with q=2 should give 0xA8 (10101000)
+  pixel_t p6 = quantize(make_pixel(0xFF, 0xAA, 0xAA, 0xAA), 1);
+  assert(get_alpha(p6) == 0xFF);
+  assert(get_red(p6) == 0xAA);
+  assert(get_green(p6) == 0xAA);
+  assert(get_blue(p6) == 0xAA);
+
+  pixel_t p7 = quantize(make_pixel(0xFF, 0xAA, 0xAA, 0xAA), 2);
+  assert(get_alpha(p7) == 0xFF);
+  assert(get_red(p7) == 0xA8);
+  assert(get_green(p7) == 0xA8);
+  assert(get_blue(p7) == 0xA8);
+
+  // Testing with 0x55 (01010101) with various q values
+  // q=1: 0x55 -> 0x54 (01010100)
+  // q=3: 0x55 -> 0x50 (01010000)
+  pixel_t p8 = quantize(make_pixel(0xFF, 0x55, 0x55, 0x55), 1);
+  assert(get_alpha(p8) == 0xFF);
+  assert(get_red(p8) == 0x54);
+  assert(get_green(p8) == 0x54);
+  assert(get_blue(p8) == 0x54);
+
+  pixel_t p9 = quantize(make_pixel(0xFF, 0x55, 0x55, 0x55), 3);
+  assert(get_alpha(p9) == 0xFF);
+  assert(get_red(p9) == 0x50);
+  assert(get_green(p9) == 0x50);
+  assert(get_blue(p9) == 0x50);
+
+  // Testing each color component independently
+  pixel_t p10 = quantize(make_pixel(0xFF, 0x3F, 0x7F, 0xBF), 6);
+  assert(get_alpha(p10) == 0xFF);
+  assert(get_red(p10) == 0x00);   // 0x3F & 0xC0 = 0x00
+  assert(get_green(p10) == 0x40); // 0x7F & 0xC0 = 0x40
+  assert(get_blue(p10) == 0x80);  // 0xBF & 0xC0 = 0x80
+
+  // Testing that alpha is never affected by quantization
+  pixel_t p11 = quantize(make_pixel(0x12, 0xFF, 0xFF, 0xFF), 8);
+  assert(get_alpha(p11) == 0x12);
+  assert(get_red(p11) == 0x00);
+  assert(get_green(p11) == 0x00);
+  assert(get_blue(p11) == 0x00);
+
+  // Complex bit pattern test: 0x9D (10011101)
+  // With q=4: should give 0x90 (10010000)
+  // With q=7: should give 0x80 (10000000)
+  pixel_t p12 = quantize(make_pixel(0xFF, 0x9D, 0x9D, 0x9D), 4);
+  assert(get_alpha(p12) == 0xFF);
+  assert(get_red(p12) == 0x90);
+  assert(get_green(p12) == 0x90);
+  assert(get_blue(p12) == 0x90);
+
+  pixel_t p13 = quantize(make_pixel(0xFF, 0x9D, 0x9D, 0x9D), 7);
+  assert(get_alpha(p13) == 0xFF);
+  assert(get_red(p13) == 0x80);
+  assert(get_green(p13) == 0x80);
+  assert(get_blue(p13) == 0x80);
+
+  // Testing powers of 2 minus 1: 0x7F, 0x3F, 0x1F, 0x0F
+  pixel_t p14 = quantize(make_pixel(0xFF, 0x7F, 0x3F, 0x1F), 5);
+  assert(get_alpha(p14) == 0xFF);
+  assert(get_red(p14) == 0x60);   // 0x7F & 0xE0 = 0x60
+  assert(get_green(p14) == 0x20); // 0x3F & 0xE0 = 0x20
+  assert(get_blue(p14) == 0x00);  // 0x1F & 0xE0 = 0x00
+
+}
