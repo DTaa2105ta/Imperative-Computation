@@ -1,17 +1,313 @@
 #use <util>
 #use <conio>
+#use "pixel-int.c0"
 
-// You are welcome to define helper functions for your tests
+// Helper function to test make_pixel with expected result
+void test_make_pixel(int alpha, int red, int green, int blue, int expected) {
+    pixel result = make_pixel(alpha, red, green, blue);
+    assert(result == expected);
+    printf("PASS: make_pixel(%d, %d, %d, %d) = 0x%s\n", 
+           alpha, red, green, blue, int2hex(result));
+}
+
+// Helper function to test get_alpha with expected result
+void test_get_alpha(pixel p, int expected_alpha) {
+    int result = get_alpha(p);
+    assert(result == expected_alpha);
+    printf("PASS: get_alpha(0x%s) = %d\n", int2hex(p), result);
+}
+
+// Helper function to test get_red with expected result
+void test_get_red(pixel p, int expected_red) {
+    int result = get_red(p);
+    assert(result == expected_red);
+    printf("PASS: get_red(0x%s) = %d\n", int2hex(p), result);
+}
+
+// Helper function to test get_green with expected result
+void test_get_green(pixel p, int expected_green) {
+    int result = get_green(p);
+    assert(result == expected_green);
+    printf("PASS: get_green(0x%s) = %d\n", int2hex(p), result);
+}
+
+// Helper function to test get_blue with expected result
+void test_get_blue(pixel p, int expected_blue) {
+    int result = get_blue(p);
+    assert(result == expected_blue);
+    printf("PASS: get_blue(0x%s) = %d\n", int2hex(p), result);
+}
+
+// Helper function to test all components at once
+void test_all_components(int alpha, int red, int green, int blue) {
+    pixel p = make_pixel(alpha, red, green, blue);
+    printf("Testing pixel: A=%d, R=%d, G=%d, B=%d (0x%s)\n", 
+           alpha, red, green, blue, int2hex(p));
+    
+    assert(get_alpha(p) == alpha);
+    assert(get_red(p) == red);
+    assert(get_green(p) == green);
+    assert(get_blue(p) == blue);
+    
+    printf("  get_alpha: %d, get_red: %d, get_green: %d, get_blue: %d \n",
+           get_alpha(p), get_red(p), get_green(p), get_blue(p));
+}
 
 int main() {
-  // Test some regular cases
+    printf("Testing make_pixel function with tricky and edge cases...\n\n");
+    
+    // Test some regular cases
+    printf("=== BASIC CASES ===\n");
+    test_make_pixel(255, 255, 255, 255, 0xFFFFFFFF);  // All white, fully opaque
+    test_make_pixel(0, 0, 0, 0, 0x00000000);          // All black, fully transparent
+    test_make_pixel(128, 128, 128, 128, 0x80808080);  // Middle gray, half transparent
+    
+    printf("\n=== INDIVIDUAL COMPONENT TESTS ===\n");
+    // Test each component individually at max value
+    test_make_pixel(255, 0, 0, 0, 0xFF000000);        // Alpha only
+    test_make_pixel(0, 255, 0, 0, 0x00FF0000);        // Red only
+    test_make_pixel(0, 0, 255, 0, 0x0000FF00);        // Green only
+    test_make_pixel(0, 0, 0, 255, 0x000000FF);        // Blue only
+    
+    printf("\n=== BOUNDARY VALUE TESTS ===\n");
+    // Test boundary values (0 and 255 for each component)
+    test_make_pixel(0, 0, 0, 255, 0x000000FF);        // Min RGB, max Blue
+    test_make_pixel(0, 0, 255, 0, 0x0000FF00);        // Min RB, max Green
+    test_make_pixel(0, 255, 0, 0, 0x00FF0000);        // Min GB, max Red
+    test_make_pixel(255, 0, 0, 0, 0xFF000000);        // Min RGB, max Alpha
+    
+    printf("\n=== EDGE CASES ===\n");
+    // Test edge values around boundaries
+    test_make_pixel(1, 1, 1, 1, 0x01010101);          // Minimum non-zero
+    test_make_pixel(254, 254, 254, 254, 0xFEFEFEFE);  // Maximum minus one
+    
+    printf("\n=== POWER OF 2 TESTS ===\n");
+    // Test powers of 2 (important for bit manipulation)
+    test_make_pixel(1, 0, 0, 0, 0x01000000);          // 2^0 in alpha
+    test_make_pixel(2, 0, 0, 0, 0x02000000);          // 2^1 in alpha
+    test_make_pixel(4, 0, 0, 0, 0x04000000);          // 2^2 in alpha
+    test_make_pixel(8, 0, 0, 0, 0x08000000);          // 2^3 in alpha
+    test_make_pixel(16, 0, 0, 0, 0x10000000);         // 2^4 in alpha
+    test_make_pixel(32, 0, 0, 0, 0x20000000);         // 2^5 in alpha
+    test_make_pixel(64, 0, 0, 0, 0x40000000);         // 2^6 in alpha
+    test_make_pixel(128, 0, 0, 0, 0x80000000);        // 2^7 in alpha
+    
+    test_make_pixel(0, 128, 0, 0, 0x00800000);        // 2^7 in red
+    test_make_pixel(0, 0, 128, 0, 0x00008000);        // 2^7 in green
+    test_make_pixel(0, 0, 0, 128, 0x00000080);        // 2^7 in blue
+    
+    printf("\n=== BIT PATTERN TESTS ===\n");
+    // Test alternating bit patterns
+    test_make_pixel(170, 85, 170, 85, 0xAA55AA55);    // 10101010, 01010101 pattern
+    test_make_pixel(85, 170, 85, 170, 0x55AA55AA);    // 01010101, 10101010 pattern
+    
+    printf("\n=== COMMON COLOR TESTS ===\n");
+    // Test common colors
+    test_make_pixel(255, 255, 0, 0, 0xFFFF0000);      // Opaque red
+    test_make_pixel(255, 0, 255, 0, 0xFF00FF00);      // Opaque green
+    test_make_pixel(255, 0, 0, 255, 0xFF0000FF);      // Opaque blue
+    test_make_pixel(255, 255, 255, 0, 0xFFFFFF00);    // Opaque yellow
+    test_make_pixel(255, 255, 0, 255, 0xFFFF00FF);    // Opaque magenta
+    test_make_pixel(255, 0, 255, 255, 0xFF00FFFF);    // Opaque cyan
+    
+    printf("\n=== TRICKY BIT SHIFTING TESTS ===\n");
+    // Test values that could cause issues with sign extension or overflow
+    test_make_pixel(127, 127, 127, 127, 0x7F7F7F7F);  // Just below sign bit
+    test_make_pixel(255, 127, 63, 31, 0xFF7F3F1F);    // Decreasing powers
+    test_make_pixel(15, 31, 63, 127, 0x0F1F3F7F);     // Increasing powers
+    
+    printf("\n=== MATHEMATICAL SEQUENCE TESTS ===\n");
+    // Test mathematical sequences
+    test_make_pixel(1, 2, 4, 8, 0x01020408);          // Powers of 2
+    test_make_pixel(3, 9, 27, 81, 0x03091B51);        // Powers of 3 (mod 256)
+    test_make_pixel(5, 25, 125, 225, 0x05197DE1);     // Powers of 5 (mod 256)
+    
+    printf("\n=== FIBONACCI-LIKE TESTS ===\n");
+    // Test Fibonacci-like sequences (mod 256)
+    test_make_pixel(1, 1, 2, 3, 0x01010203);
+    test_make_pixel(5, 8, 13, 21, 0x05080D15);
+    test_make_pixel(34, 55, 89, 144, 0x22375990);
+    
+    printf("\n=== PRIME NUMBER TESTS ===\n");
+    // Test with prime numbers
+    test_make_pixel(2, 3, 5, 7, 0x02030507);
+    test_make_pixel(11, 13, 17, 19, 0x0B0D1113);
+    test_make_pixel(23, 29, 31, 37, 0x171D1F25);
+    test_make_pixel(41, 43, 47, 53, 0x292B2F35);
+    
+    printf("\n=== STRESS TESTS ===\n");
+    // Test all combinations of min/max values
+    test_make_pixel(0, 0, 0, 255, 0x000000FF);
+    test_make_pixel(0, 0, 255, 0, 0x0000FF00);
+    test_make_pixel(0, 0, 255, 255, 0x0000FFFF);
+    test_make_pixel(0, 255, 0, 0, 0x00FF0000);
+    test_make_pixel(0, 255, 0, 255, 0x00FF00FF);
+    test_make_pixel(0, 255, 255, 0, 0x00FFFF00);
+    test_make_pixel(255, 0, 0, 0, 0xFF000000);
+    test_make_pixel(255, 0, 0, 255, 0xFF0000FF);
+    test_make_pixel(255, 0, 255, 0, 0xFF00FF00);
+    test_make_pixel(255, 255, 0, 0, 0xFFFF0000);
+    
+    printf("\n");
+    printf("========================================\n");
+    printf("TESTING GETTER FUNCTIONS\n");
+    printf("========================================\n");
+    
+    printf("\n=== BASIC GETTER TESTS ===\n");
+    // Test basic functionality with known values
+    test_all_components(255, 255, 255, 255);  // All max
+    test_all_components(0, 0, 0, 0);          // All min
+    test_all_components(128, 64, 32, 16);     // Distinct values
+    test_all_components(170, 85, 170, 85);    // Alternating pattern
+    
+    printf("\n=== INDIVIDUAL COMPONENT ISOLATION TESTS ===\n");
+    // Test each component in isolation
+    printf("Alpha isolation tests:\n");
+    test_get_alpha(0xFF000000, 255);  // Alpha=255, others=0
+    test_get_alpha(0x80000000, 128);  // Alpha=128, others=0
+    test_get_alpha(0x01000000, 1);    // Alpha=1, others=0
+    test_get_alpha(0x00FFFFFF, 0);    // Alpha=0, others=255
+    
+    printf("Red isolation tests:\n");
+    test_get_red(0x00FF0000, 255);    // Red=255, others=0
+    test_get_red(0x00800000, 128);    // Red=128, others=0
+    test_get_red(0x00010000, 1);      // Red=1, others=0
+    test_get_red(0xFF00FFFF, 0);      // Red=0, others=255
+    
+    printf("Green isolation tests:\n");
+    test_get_green(0x0000FF00, 255);  // Green=255, others=0
+    test_get_green(0x00008000, 128);  // Green=128, others=0
+    test_get_green(0x00000100, 1);    // Green=1, others=0
+    test_get_green(0xFFFF00FF, 0);    // Green=0, others=255
+    
+    printf("Blue isolation tests:\n");
+    test_get_blue(0x000000FF, 255);   // Blue=255, others=0
+    test_get_blue(0x00000080, 128);   // Blue=128, others=0
+    test_get_blue(0x00000001, 1);     // Blue=1, others=0
+    test_get_blue(0xFFFFFF00, 0);     // Blue=0, others=255
+    
+    printf("\n=== BOUNDARY VALUE TESTS ===\n");
+    // Test extreme values for each component
+    test_all_components(255, 0, 0, 0);    // Max alpha, min others
+    test_all_components(0, 255, 0, 0);    // Max red, min others
+    test_all_components(0, 0, 255, 0);    // Max green, min others
+    test_all_components(0, 0, 0, 255);    // Max blue, min others
+    test_all_components(254, 254, 254, 254);  // One below max
+    test_all_components(1, 1, 1, 1);      // One above min
+    
+    printf("\n=== POWER OF 2 GETTER TESTS ===\n");
+    // Test powers of 2 in each position
+    printf("Powers of 2 in alpha position:\n");
+    test_get_alpha(0x01000000, 1);    // 2^0
+    test_get_alpha(0x02000000, 2);    // 2^1
+    test_get_alpha(0x04000000, 4);    // 2^2
+    test_get_alpha(0x08000000, 8);    // 2^3
+    test_get_alpha(0x10000000, 16);   // 2^4
+    test_get_alpha(0x20000000, 32);   // 2^5
+    test_get_alpha(0x40000000, 64);   // 2^6
+    test_get_alpha(0x80000000, 128);  // 2^7
+    
+    printf("Powers of 2 in red position:\n");
+    test_get_red(0x00010000, 1);      // 2^0
+    test_get_red(0x00020000, 2);      // 2^1
+    test_get_red(0x00040000, 4);      // 2^2
+    test_get_red(0x00080000, 8);      // 2^3
+    test_get_red(0x00100000, 16);     // 2^4
+    test_get_red(0x00200000, 32);     // 2^5
+    test_get_red(0x00400000, 64);     // 2^6
+    test_get_red(0x00800000, 128);    // 2^7
+    
+    printf("Powers of 2 in green position:\n");
+    test_get_green(0x00000100, 1);    // 2^0
+    test_get_green(0x00000200, 2);    // 2^1
+    test_get_green(0x00000400, 4);    // 2^2
+    test_get_green(0x00000800, 8);    // 2^3
+    test_get_green(0x00001000, 16);   // 2^4
+    test_get_green(0x00002000, 32);   // 2^5
+    test_get_green(0x00004000, 64);   // 2^6
+    test_get_green(0x00008000, 128);  // 2^7
+    
+    printf("Powers of 2 in blue position:\n");
+    test_get_blue(0x00000001, 1);     // 2^0
+    test_get_blue(0x00000002, 2);     // 2^1
+    test_get_blue(0x00000004, 4);     // 2^2
+    test_get_blue(0x00000008, 8);     // 2^3
+    test_get_blue(0x00000010, 16);    // 2^4
+    test_get_blue(0x00000020, 32);    // 2^5
+    test_get_blue(0x00000040, 64);    // 2^6
+    test_get_blue(0x00000080, 128);   // 2^7
+    
+    printf("\n=== BIT PATTERN INTERFERENCE TESTS ===\n");
+    // Test that components don't interfere with each other
+    printf("High bits don't affect low components:\n");
+    test_get_blue(0xFFFFFFFF, 255);   // All bits set
+    test_get_blue(0xFFFFFF00, 0);     // All except blue set
+    test_get_green(0xFFFF00FF, 0);    // All except green set
+    test_get_red(0xFF00FFFF, 0);      // All except red set
+    test_get_alpha(0x00FFFFFF, 0);    // All except alpha set
+    
+    printf("Alternating bit patterns:\n");
+    test_all_components(170, 85, 170, 85);   // 0xAA55AA55
+    test_all_components(85, 170, 85, 170);   // 0x55AA55AA
+    test_all_components(204, 51, 204, 51);   // 0xCC33CC33
+    test_all_components(51, 204, 51, 204);   // 0x33CC33CC
+    
+    printf("\n=== SIGN EXTENSION TESTS ===\n");
+    // Test values that could cause sign extension issues
+    printf("Testing sign bit scenarios:\n");
+    test_get_alpha(0x80808080, 128);  // Sign bit set in alpha
+    test_get_red(0x80808080, 128);    // Sign bit set in red
+    test_get_green(0x80808080, 128);  // Sign bit set in green
+    test_get_blue(0x80808080, 128);   // Sign bit set in blue
+    
+    test_get_alpha(0x7F7F7F7F, 127);  // Just below sign bit
+    test_get_red(0x7F7F7F7F, 127);
+    test_get_green(0x7F7F7F7F, 127);
+    test_get_blue(0x7F7F7F7F, 127);
+    
+    printf("\n=== CHALLENGING MIXED COMPONENT TESTS ===\n");
+    // Test complex combinations that could reveal implementation bugs
+    test_all_components(255, 128, 64, 32);   // Decreasing powers of 2
+    test_all_components(32, 64, 128, 255);   // Increasing powers of 2
+    test_all_components(15, 31, 63, 127);    // 2^n - 1 pattern
+    test_all_components(240, 224, 192, 128); // Decreasing high bits
+    
+    printf("\n=== MATHEMATICAL SEQUENCE GETTER TESTS ===\n");
+    // Test mathematical sequences
+    test_all_components(1, 2, 4, 8);         // Powers of 2
+    test_all_components(3, 9, 27, 81);       // Powers of 3 (mod 256)
+    test_all_components(5, 25, 125, 225);    // Powers of 5 (mod 256)
+    test_all_components(2, 3, 5, 7);         // First primes
+    test_all_components(11, 13, 17, 19);     // Next primes
+    
+    printf("\n=== EDGE CASE STRESS TESTS ===\n");
+    // Test every possible 8-bit value in alpha position with complex backgrounds
+    printf("Alpha stress test with complex background:\n");
+    pixel complex_bg = 0x12345678;  // Complex background pattern
+    for (int a = 0; a <= 255; a += 85) {  // Test 0, 85, 170, 255
+        pixel test_pixel = (a << 24) | (complex_bg & 0x00FFFFFF);
+        test_get_alpha(test_pixel, a);
+    }
+    
+    printf("Component isolation with noisy backgrounds:\n");
+    // Test each component with maximum noise in other positions
+    test_get_alpha(0xFF000000, 255);  // Alpha max, others min
+    test_get_alpha(0xFFFFFFFF, 255);  // Alpha max, others max
+    test_get_red(0x00FF0000, 255);    // Red max, others min
+    test_get_red(0xFFFFFFFF, 255);    // Red max, others max
+    test_get_green(0x0000FF00, 255);  // Green max, others min
+    test_get_green(0xFFFFFFFF, 255);  // Green max, others max
+    test_get_blue(0x000000FF, 255);   // Blue max, others min
+    test_get_blue(0xFFFFFFFF, 255);   // Blue max, others max
+    
+    printf("\n=== ROUND-TRIP CONSISTENCY TESTS ===\n");
+    // Test that make_pixel and get_* functions are consistent
+    printf("Round-trip consistency tests:\n");
+    test_all_components(42, 123, 200, 17);   // Random values
+    test_all_components(99, 88, 77, 66);     // Decreasing
+    test_all_components(11, 22, 33, 44);     // Increasing
+    test_all_components(173, 205, 51, 119);  // Mixed pattern
 
-
-
-  // Run some edge cases
-
-
-
-  printf("All tests passed!\n");
-  return 0;
+    printf("\nAll tests passed!\n");
+    return 0;
 }
