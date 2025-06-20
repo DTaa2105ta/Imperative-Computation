@@ -21,22 +21,26 @@
    the test cases below. Fix it, but do not change the interface. (You
    shouldn't need to change the test cases, either.)
  */
-
+#use <conio>
 void count_zeroes(pixel_t[] A, int length, int[] results)
 //@requires \length(A) == length;
 //@requires \length(results) == 3;
 {
-  results = alloc_array(int, 3);
+  // Initialize all counters to zero
+  results[0] = 0;
+  results[1] = 0;
+  results[2] = 0;
 
-  for (int i = 0; i < length; i++)
-  //@loop_invariant 0 <= i;
+  // Single pass through the pixel array
+  for (int i = 0; i < length; i++) 
+  //@loop_invariant 0 <= i && i <= length;
   {
     if (get_red(A[i]) == 0)
-      results[0] = results[0] + 1;
+      results[0]++;
     if (get_green(A[i]) == 0)
-      results[1] = results[1] + 1;
-    if (get_blue(A[i]) == 0)
-      results[2] = results[2] + 1;
+      results[1]++;
+    if (get_blue(A[i]) == 0) 
+      results[2]++;
   }
 }
 
