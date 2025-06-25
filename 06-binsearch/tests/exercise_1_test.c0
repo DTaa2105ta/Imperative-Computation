@@ -1,0 +1,241 @@
+#use <conio>
+#use "../arrayutil.c0"
+#use "../exercise_1.c0"
+
+// Helper function to create and fill array
+int[] create_array(int size, int[] values) {
+    int[] A = alloc_array(int, size);
+    for (int i = 0; i < size; i++) {
+        A[i] = values[i];
+    }
+    return A;
+}
+
+// Helper function to verify search result
+void verify_search_result(int x, int[] A, int n, int expected, string test_name) {
+    int result = search(x, A, n);
+    printf("Test: %s\n", test_name);
+    printf("  Searching for %d in array: ", x);
+    print_seg(A, 0, n);
+    printf("\n  Expected: %d, Got: %d\n", expected, result);
+    
+    if (expected == -1) {
+        assert(result == -1);
+        assert(!is_in(x, A, 0, n));
+    } else {
+        assert(0 <= result && result < n);
+        assert(A[result] == x);
+    }
+    printf("  PASSED\n\n");
+}
+
+void test_edge_cases() {
+    printf("=== TESTING EDGE CASES ===\n");
+    
+    // Test 1: Empty array
+    int[] A1 = alloc_array(int, 0);
+    verify_search_result(5, A1, 0, -1, "Empty array");
+    
+    // Test 2: Single element - found
+    int[] vals2 = alloc_array(int, 1);
+    vals2[0] = 42;
+    int[] A2 = create_array(1, vals2);
+    verify_search_result(42, A2, 1, 0, "Single element - found");
+    
+    // Test 3: Single element - not found (smaller)
+    verify_search_result(10, A2, 1, -1, "Single element - target smaller");
+    
+    // Test 4: Single element - not found (larger)
+    verify_search_result(100, A2, 1, -1, "Single element - target larger");
+}
+
+void test_boundary_cases() {
+    printf("=== TESTING BOUNDARY CASES ===\n");
+    
+    // Test with array: [1, 3, 5, 7, 9, 11, 13, 15]
+    int[] vals = alloc_array(int, 8);
+    vals[0] = 1; vals[1] = 3; vals[2] = 5; vals[3] = 7;
+    vals[4] = 9; vals[5] = 11; vals[6] = 13; vals[7] = 15;
+    int[] A = create_array(8, vals);
+    
+    // Test first element
+    verify_search_result(1, A, 8, 0, "First element");
+    
+    // Test last element
+    verify_search_result(15, A, 8, 7, "Last element");
+    
+    // Test element smaller than first
+    verify_search_result(0, A, 8, -1, "Smaller than first");
+    
+    // Test element larger than last
+    verify_search_result(20, A, 8, -1, "Larger than last");
+    
+    // Test elements between existing values
+    verify_search_result(2, A, 8, -1, "Between first and second");
+    verify_search_result(4, A, 8, -1, "Between second and third");
+    verify_search_result(14, A, 8, -1, "Between last two");
+}
+
+void test_duplicates() {
+    printf("=== TESTING DUPLICATES ===\n");
+    
+    // Array with duplicates: [1, 2, 2, 2, 5, 7, 7, 9]
+    int[] vals = alloc_array(int, 8);
+    vals[0] = 1; vals[1] = 2; vals[2] = 2; vals[3] = 2;
+    vals[4] = 5; vals[5] = 7; vals[6] = 7; vals[7] = 9;
+    int[] A = create_array(8, vals);
+    
+    // Search for duplicate values - any valid index should work
+    int result2 = search(2, A, 8);
+    printf("Test: Searching for duplicate value 2\n");
+    printf("  Array: ");
+    print_seg(A, 0, 8);
+    printf("\n  Found at index: %d\n", result2);
+    assert(result2 >= 1 && result2 <= 3);  // Any of indices 1, 2, 3 is valid
+    assert(A[result2] == 2);
+    printf("  PASSED\n\n");
+    
+    int result7 = search(7, A, 8);
+    printf("Test: Searching for duplicate value 7\n");
+    printf("  Array: ");
+    print_seg(A, 0, 8);
+    printf("\n  Found at index: %d\n", result7);
+    assert(result7 >= 5 && result7 <= 6);  // Any of indices 5, 6 is valid
+    assert(A[result7] == 7);
+    printf("  PASSED\n\n");
+    
+    // Test unique values in array with duplicates
+    verify_search_result(1, A, 8, 0, "Unique value at start");
+    verify_search_result(5, A, 8, 4, "Unique value in middle");
+    verify_search_result(9, A, 8, 7, "Unique value at end");
+}
+
+void test_all_same_elements() {
+    printf("=== TESTING ALL SAME ELEMENTS ===\n");
+    
+    // Array: [5, 5, 5, 5, 5]
+    int[] vals = alloc_array(int, 5);
+    for (int i = 0; i < 5; i++) {
+        vals[i] = 5;
+    }
+    int[] A = create_array(5, vals);
+    
+    // Should find the target (any index is valid)
+    int result = search(5, A, 5);
+    printf("Test: All same elements\n");
+    printf("  Array: ");
+    print_seg(A, 0, 5);
+    printf("\n  Found at index: %d\n", result);
+    assert(result >= 0 && result < 5);
+    assert(A[result] == 5);
+    printf("  PASSED\n\n");
+    
+    // Should not find different values
+    verify_search_result(4, A, 5, -1, "All same - target smaller");
+    verify_search_result(6, A, 5, -1, "All same - target larger");
+}
+
+void test_extreme_values() {
+    printf("=== TESTING EXTREME VALUES ===\n");
+    
+    // Test with large numbers and potential overflow scenarios
+    int[] vals = alloc_array(int, 4);
+    vals[0] = -2147483648;  // INT_MIN
+    vals[1] = -1;
+    vals[2] = 1000000000;
+    vals[3] = 2147483647;   // INT_MAX
+    int[] A = create_array(4, vals);
+    
+    verify_search_result(-2147483648, A, 4, 0, "INT_MIN");
+    verify_search_result(2147483647, A, 4, 3, "INT_MAX");
+    verify_search_result(0, A, 4, -1, "Zero between negatives and positives");
+}
+
+void test_power_of_two_sizes() {
+    printf("=== TESTING VARIOUS ARRAY SIZES ===\n");
+    
+    // Test with array size that's a power of 2: [0, 2, 4, 6, 8, 10, 12, 14]
+    int[] vals8 = alloc_array(int, 8);
+    for (int i = 0; i < 8; i++) {
+        vals8[i] = i * 2;
+    }
+    int[] A8 = create_array(8, vals8);
+    
+    // Test middle element
+    verify_search_result(6, A8, 8, 3, "Power of 2 size - middle element");
+    
+    // Test with array size that's power of 2 minus 1: [1, 3, 5, 7, 9, 11, 13]
+    int[] vals7 = alloc_array(int, 7);
+    for (int i = 0; i < 7; i++) {
+        vals7[i] = i * 2 + 1;
+    }
+    int[] A7 = create_array(7, vals7);
+    
+    verify_search_result(7, A7, 7, 3, "Power of 2 minus 1 size - middle element");
+    
+    // Test with array size that's power of 2 plus 1: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    int[] vals9 = alloc_array(int, 9);
+    for (int i = 0; i < 9; i++) {
+        vals9[i] = i;
+    }
+    int[] A9 = create_array(9, vals9);
+    
+    verify_search_result(4, A9, 9, 4, "Power of 2 plus 1 size - middle element");
+}
+
+void test_negative_numbers() {
+    printf("=== TESTING NEGATIVE NUMBERS ===\n");
+    
+    // Array: [-10, -7, -3, -1, 0, 2, 5, 8]
+    int[] vals = alloc_array(int, 8);
+    vals[0] = -10; vals[1] = -7; vals[2] = -3; vals[3] = -1;
+    vals[4] = 0; vals[5] = 2; vals[6] = 5; vals[7] = 8;
+    int[] A = create_array(8, vals);
+    
+    verify_search_result(-7, A, 8, 1, "Negative number found");
+    verify_search_result(-5, A, 8, -1, "Negative number not found");
+    verify_search_result(0, A, 8, 4, "Zero in mixed array");
+}
+
+void test_algorithmic_correctness() {
+    printf("=== TESTING ALGORITHMIC EDGE CASES ===\n");
+    
+    // Test case that specifically tests the inclusive bounds modification
+    // Array where target is at positions that test lo <= hi condition thoroughly
+    int[] vals = alloc_array(int, 3);
+    vals[0] = 1; vals[1] = 2; vals[2] = 3;
+    int[] A = create_array(3, vals);
+    
+    // These should work correctly with inclusive hi bound
+    verify_search_result(1, A, 3, 0, "Inclusive bounds - first element");
+    verify_search_result(2, A, 3, 1, "Inclusive bounds - middle element");
+    verify_search_result(3, A, 3, 2, "Inclusive bounds - last element");
+    
+    // Test case that could expose off-by-one errors in loop termination
+    int[] vals2 = alloc_array(int, 2);
+    vals2[0] = 10; vals2[1] = 20;
+    int[] A2 = create_array(2, vals2);
+    
+    verify_search_result(15, A2, 2, -1, "Two element array - not found between");
+    verify_search_result(5, A2, 2, -1, "Two element array - not found before");
+    verify_search_result(25, A2, 2, -1, "Two element array - not found after");
+}
+
+int main() {
+    printf("Starting comprehensive binary search tests...\n\n");
+    
+    test_edge_cases();
+    test_boundary_cases();
+    test_duplicates();
+    test_all_same_elements();
+    test_extreme_values();
+    test_power_of_two_sizes();
+    test_negative_numbers();
+    test_algorithmic_correctness();
+    
+    printf("=== ALL TESTS PASSED! ===\n");
+    printf("Binary search with inclusive bounds is working correctly.\n");
+    
+    return 0;
+}
+
