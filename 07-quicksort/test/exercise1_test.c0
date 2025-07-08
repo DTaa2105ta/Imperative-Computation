@@ -1,0 +1,204 @@
+#use "../exercise_1.c0"
+
+// Test 1: Basic permutation - simple case
+void test_basic_permutation() {
+    printf("Test 1: Basic permutation\n");
+    int[] A = alloc_array(int, 4);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 4;
+    
+    int[] B = alloc_array(int, 4);
+    B[0] = 4; B[1] = 3; B[2] = 1; B[3] = 2;
+    
+    assert(is_permutation(A, 0, 4, B, 0, 4));
+    printf("  PASSED: [1,2,3,4] and [4,3,1,2] are permutations\n");
+}
+
+// Test 2: Edge case - empty segments
+void test_empty_segments() {
+    printf("Test 2: Empty segments\n");
+    int[] A = alloc_array(int, 5);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 4; A[4] = 5;
+    
+    int[] B = alloc_array(int, 3);
+    B[0] = 10; B[1] = 20; B[2] = 30;
+    
+    assert(is_permutation(A, 2, 2, B, 1, 1)); // Both empty segments
+    printf("  PASSED: Empty segments are permutations\n");
+}
+
+// Test 3: Single element segments
+void test_single_elements() {
+    printf("Test 3: Single element segments\n");
+    int[] A = alloc_array(int, 3);
+    A[0] = 10; A[1] = 42; A[2] = 30;
+    
+    int[] B = alloc_array(int, 4);
+    B[0] = 1; B[1] = 42; B[2] = 3; B[3] = 4;
+    
+    assert(is_permutation(A, 1, 2, B, 1, 2)); // Both contain 42
+    printf("  PASSED: Single elements [42] and [42] are permutations\n");
+    
+    int[] C = alloc_array(int, 2);
+    C[0] = 99; C[1] = 100;
+    
+    assert(!is_permutation(A, 1, 2, C, 0, 1)); // 42 vs 99
+    printf("  PASSED: Single elements [42] and [99] are not permutations\n");
+}
+
+// Test 4: Different lengths should return false
+void test_different_lengths() {
+    printf("Test 4: Different lengths\n");
+    int[] A = alloc_array(int, 5);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 4; A[4] = 5;
+    
+    int[] B = alloc_array(int, 3);
+    B[0] = 1; B[1] = 2; B[2] = 3;
+    
+    assert(!is_permutation(A, 0, 4, B, 0, 3)); // length 4 vs length 3
+    printf("  PASSED: Different length segments are not permutations\n");
+}
+
+// Test 5: Tricky case - same elements, different counts
+void test_different_counts() {
+    printf("Test 5: Different element counts\n");
+    int[] A = alloc_array(int, 4);
+    A[0] = 1; A[1] = 2; A[2] = 2; A[3] = 3;
+    
+    int[] B = alloc_array(int, 4);
+    B[0] = 1; B[1] = 2; B[2] = 3; B[3] = 3;
+    
+    assert(!is_permutation(A, 0, 4, B, 0, 4)); // [1,2,2,3] vs [1,2,3,3]
+    printf("  PASSED: [1,2,2,3] and [1,2,3,3] are not permutations\n");
+}
+
+// Test 6: Duplicates - tricky permutation case
+void test_duplicates_permutation() {
+    printf("Test 6: Duplicates permutation\n");
+    int[] A = alloc_array(int, 6);
+    A[0] = 5; A[1] = 1; A[2] = 3; A[3] = 1; A[4] = 5; A[5] = 3;
+    
+    int[] B = alloc_array(int, 6);
+    B[0] = 3; B[1] = 5; B[2] = 1; B[3] = 3; B[4] = 1; B[5] = 5;
+    
+    assert(is_permutation(A, 0, 6, B, 0, 6));
+    printf("  PASSED: [5,1,3,1,5,3] and [3,5,1,3,1,5] are permutations\n");
+}
+
+// Test 7: Edge case - segments within same array
+void test_same_array_segments() {
+    printf("Test 7: Same array segments\n");
+    int[] A = alloc_array(int, 8);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 4; A[4] = 4; A[5] = 3; A[6] = 2; A[7] = 1;
+    
+    assert(is_permutation(A, 0, 4, A, 4, 8)); // [1,2,3,4] vs [4,3,2,1]
+    printf("  PASSED: Segments from same array can be permutations\n");
+}
+
+// Test 8: Negative numbers
+void test_negative_numbers() {
+    printf("Test 8: Negative numbers\n");
+    int[] A = alloc_array(int, 5);
+    A[0] = -1; A[1] = 0; A[2] = 1; A[3] = -2; A[4] = 2;
+    
+    int[] B = alloc_array(int, 5);
+    B[0] = 2; B[1] = -2; B[2] = 1; B[3] = 0; B[4] = -1;
+    
+    assert(is_permutation(A, 0, 5, B, 0, 5));
+    printf("  PASSED: [-1,0,1,-2,2] and [2,-2,1,0,-1] are permutations\n");
+}
+
+// Test 9: Large numbers and edge values
+void test_large_numbers() {
+    printf("Test 9: Large numbers\n");
+    int[] A = alloc_array(int, 4);
+    A[0] = 2147483647; A[1] = -2147483648; A[2] = 0; A[3] = 1000000;
+    
+    int[] B = alloc_array(int, 4);
+    B[0] = 0; B[1] = 1000000; B[2] = 2147483647; B[3] = -2147483648;
+    
+    assert(is_permutation(A, 0, 4, B, 0, 4));
+    printf("  PASSED: Large numbers permutation test\n");
+}
+
+// Test 10: All identical elements
+void test_all_identical() {
+    printf("Test 10: All identical elements\n");
+    int[] A = alloc_array(int, 5);
+    A[0] = 7; A[1] = 7; A[2] = 7; A[3] = 7; A[4] = 7;
+    
+    int[] B = alloc_array(int, 5);
+    B[0] = 7; B[1] = 7; B[2] = 7; B[3] = 7; B[4] = 7;
+    
+    assert(is_permutation(A, 0, 5, B, 0, 5));
+    printf("  PASSED: All identical elements are permutations\n");
+    
+    int[] C = alloc_array(int, 5);
+    C[0] = 7; C[1] = 7; C[2] = 7; C[3] = 7; C[4] = 8; // One different
+    
+    assert(!is_permutation(A, 0, 5, C, 0, 5));
+    printf("  PASSED: Almost identical elements are not permutations\n");
+}
+
+// Test 11: Boundary testing - using different lo/hi values
+void test_boundary_segments() {
+    printf("Test 11: Boundary segments\n");
+    int[] A = alloc_array(int, 10);
+    for (int i = 0; i < 10; i++) {
+        A[i] = i;
+    }
+    
+    int[] B = alloc_array(int, 10);
+    B[0] = 100; B[1] = 5; B[2] = 4; B[3] = 3; B[4] = 2; 
+    B[5] = 300; B[6] = 400; B[7] = 500; B[8] = 600; B[9] = 700;
+    
+    assert(is_permutation(A, 2, 6, B, 1, 5)); // [2,3,4,5] vs [5,4,3,2] (rearranged)
+    printf("  PASSED: Boundary segments [2,3,4,5] are permutations\n");
+}
+
+// Test 12: Very tricky case - similar but not identical
+void test_tricky_similar() {
+    printf("Test 12: Tricky similar case\n");
+    int[] A = alloc_array(int, 6);
+    A[0] = 1; A[1] = 2; A[2] = 3; A[3] = 4; A[4] = 5; A[5] = 6;
+    
+    int[] B = alloc_array(int, 6);
+    B[0] = 1; B[1] = 2; B[2] = 3; B[3] = 4; B[4] = 5; B[5] = 7; // 7 instead of 6
+    
+    assert(!is_permutation(A, 0, 6, B, 0, 6));
+    printf("  PASSED: [1,2,3,4,5,6] and [1,2,3,4,5,7] are not permutations\n");
+}
+
+// Test 13: Zero and boundary integers
+void test_zero_boundaries() {
+    printf("Test 13: Zero and boundary cases\n");
+    int[] A = alloc_array(int, 3);
+    A[0] = 0; A[1] = -1; A[2] = 1;
+    
+    int[] B = alloc_array(int, 3);
+    B[0] = 1; B[1] = 0; B[2] = -1;
+    
+    assert(is_permutation(A, 0, 3, B, 0, 3));
+    printf("  PASSED: [0,-1,1] and [1,0,-1] are permutations\n");
+}
+
+// Main test runner
+int main() {
+    printf("=== Testing is_permutation function ===\n\n");
+    
+    test_basic_permutation();
+    test_empty_segments();
+    test_single_elements();
+    test_different_lengths();
+    test_different_counts();
+    test_duplicates_permutation();
+    test_same_array_segments();
+    test_negative_numbers();
+    test_large_numbers();
+    test_all_identical();
+    test_boundary_segments();
+    test_tricky_similar();
+    test_zero_boundaries();
+    
+    printf("\n=== All tests completed successfully! ===\n");
+    return 0;
+}
