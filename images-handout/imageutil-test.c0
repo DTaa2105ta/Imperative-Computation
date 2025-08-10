@@ -1,0 +1,571 @@
+#use <util>
+#use <conio>
+#use <string>
+
+#use "pixel-int.c0"
+#use "imageutil.c0"
+
+// =============================================================================
+// HELPER FUNCTIONS FOR COMPREHENSIVE TESTING
+// =============================================================================
+
+// Helper function to test is_valid_imagesize with expected result
+void test_is_valid_imagesize(int width, int height, bool expected) {
+    bool result = is_valid_imagesize(width, height);
+    assert(result == expected);
+    printf("PASS: is_valid_imagesize(%d, %d) = %s\n", 
+           width, height, result ? "true" : "false");
+}
+
+// Helper function to test get_row with expected result
+void test_get_row(int index, int width, int height, int expected_row) {
+    // Only test if preconditions are met
+    if (is_valid_imagesize(width, height) && 0 <= index && index < width * height) {
+        int result = get_row(index, width, height);
+        assert(result == expected_row);
+        printf("PASS: get_row(%d, %d, %d) = %d\n", 
+               index, width, height, result);
+    }
+}
+
+// Helper function to test get_column with expected result
+void test_get_column(int index, int width, int height, int expected_col) {
+    // Only test if preconditions are met
+    if (is_valid_imagesize(width, height) && 0 <= index && index < width * height) {
+        int result = get_column(index, width, height);
+        assert(result == expected_col);
+        printf("PASS: get_column(%d, %d, %d) = %d\n", 
+               index, width, height, result);
+    }
+}
+
+// Helper function to test is_valid_pixel with expected result
+void test_is_valid_pixel(int row, int col, int width, int height, bool expected) {
+    // Only test if width and height are valid
+    if (is_valid_imagesize(width, height)) {
+        bool result = is_valid_pixel(row, col, width, height);
+        assert(result == expected);
+        printf("PASS: is_valid_pixel(%d, %d, %d, %d) = %s\n", 
+               row, col, width, height, result ? "true" : "false");
+    }
+}
+
+// Helper function to test get_index with expected result
+void test_get_index(int row, int col, int width, int height, int expected_index) {
+    // Only test if all preconditions are met
+    if (is_valid_imagesize(width, height) && is_valid_pixel(row, col, width, height)) {
+        int result = get_index(row, col, width, height);
+        assert(result == expected_index);
+        printf("PASS: get_index(%d, %d, %d, %d) = %d\n", 
+               row, col, width, height, result);
+    }
+}
+
+// Helper function to test round-trip conversion (index -> row,col -> index)
+void test_index_roundtrip(int original_index, int width, int height) {
+    if (is_valid_imagesize(width, height) && 0 <= original_index && original_index < width * height) {
+        int row = get_row(original_index, width, height);
+        int col = get_column(original_index, width, height);
+        int reconstructed_index = get_index(row, col, width, height);
+        assert(original_index == reconstructed_index);
+        printf("PASS: Round-trip index %d -> (%d,%d) -> %d\n", 
+               original_index, row, col, reconstructed_index);
+    }
+}
+
+// Helper function to test coordinate round-trip (row,col -> index -> row,col)
+void test_coordinate_roundtrip(int original_row, int original_col, int width, int height) {
+    if (is_valid_imagesize(width, height) && is_valid_pixel(original_row, original_col, width, height)) {
+        int index = get_index(original_row, original_col, width, height);
+        int reconstructed_row = get_row(index, width, height);
+        int reconstructed_col = get_column(index, width, height);
+        assert(original_row == reconstructed_row && original_col == reconstructed_col);
+        printf("PASS: Round-trip coord (%d,%d) -> %d -> (%d,%d)\n", 
+               original_row, original_col, index, reconstructed_row, reconstructed_col);
+    }
+}
+
+// =============================================================================
+// MAIN TESTING FUNCTION
+// =============================================================================
+
+int main() {
+    printf("=== COMPREHENSIVE IMAGEUTIL INDUSTRIAL-STANDARD TEST SUITE ===\n\n");
+
+    // =========================================================================
+    // SECTION 1: is_valid_imagesize TESTS
+    // =========================================================================
+    printf("=== TESTING is_valid_imagesize ===\n");
+    
+    printf("Basic valid cases:\n");
+    test_is_valid_imagesize(1, 1, true);
+    test_is_valid_imagesize(10, 10, true);
+    test_is_valid_imagesize(100, 100, true);
+    test_is_valid_imagesize(1000, 1000, true);
+    
+    printf("Zero and negative cases:\n");
+    test_is_valid_imagesize(0, 1, false);
+    test_is_valid_imagesize(1, 0, false);
+    test_is_valid_imagesize(0, 0, false);
+    test_is_valid_imagesize(-1, 10, false);
+    test_is_valid_imagesize(10, -1, false);
+    test_is_valid_imagesize(-5, -5, false);
+    
+    printf("Overflow boundary tests:\n");
+    // Test near int_max boundary
+    int max_int = int_max();
+    test_is_valid_imagesize(max_int, 1, true);
+    test_is_valid_imagesize(1, max_int, true);
+    
+    // Test overflow scenarios
+    int sqrt_max = 46340; // Approximately sqrt(int_max())
+    test_is_valid_imagesize(sqrt_max, sqrt_max, true);
+    test_is_valid_imagesize(sqrt_max + 1, sqrt_max + 1, false);
+    
+    // Edge cases around overflow
+    test_is_valid_imagesize(65536, 32768, false); // Should overflow
+    test_is_valid_imagesize(32768, 65536, false); // Should overflow
+    test_is_valid_imagesize(46341, 46341, false); // Definitely overflows
+    
+    printf("Prime number dimension tests:\n");
+    test_is_valid_imagesize(97, 101, true);  // Small primes
+    test_is_valid_imagesize(997, 1009, true); // Medium primes
+    
+    printf("Power of 2 dimension tests:\n");
+    test_is_valid_imagesize(512, 512, true);
+    test_is_valid_imagesize(1024, 1024, true);
+    test_is_valid_imagesize(2048, 2048, true);
+    
+    // =========================================================================
+    // SECTION 2: get_row TESTS
+    // =========================================================================
+    printf("\n=== TESTING get_row ===\n");
+    
+    printf("Basic cases:\n");
+    test_get_row(0, 5, 5, 0);    // First pixel
+    test_get_row(4, 5, 5, 0);    // Last pixel of first row
+    test_get_row(5, 5, 5, 1);    // First pixel of second row
+    test_get_row(24, 5, 5, 4);   // Last pixel
+    
+    printf("Single row/column edge cases:\n");
+    test_get_row(0, 1, 10, 0);   // Single column, first pixel
+    test_get_row(9, 1, 10, 9);   // Single column, last pixel
+    test_get_row(0, 10, 1, 0);   // Single row, first pixel
+    test_get_row(9, 10, 1, 0);   // Single row, last pixel
+    
+    printf("Mathematical pattern tests:\n");
+    // Test systematic patterns
+    for (int w = 2; w <= 8; w += 2) {
+        for (int h = 2; h <= 8; h += 2) {
+            if (is_valid_imagesize(w, h)) {
+                // Test corners and middle
+                test_get_row(0, w, h, 0);              // Top-left
+                test_get_row(w - 1, w, h, 0);          // Top-right
+                test_get_row(w * (h - 1), w, h, h - 1); // Bottom-left
+                test_get_row(w * h - 1, w, h, h - 1);   // Bottom-right
+                
+                // Test middle row if it exists
+                if (h > 2) {
+                    int mid_row = h / 2;
+                    test_get_row(mid_row * w, w, h, mid_row);
+                }
+            }
+        }
+    }
+    
+    printf("Large dimension tests:\n");
+    test_get_row(0, 1000, 1000, 0);
+    test_get_row(999, 1000, 1000, 0);
+    test_get_row(1000, 1000, 1000, 1);
+    test_get_row(500000, 1000, 1000, 500);
+    test_get_row(999999, 1000, 1000, 999);
+    
+    // =========================================================================
+    // SECTION 3: get_column TESTS
+    // =========================================================================
+    printf("\n=== TESTING get_column ===\n");
+    
+    printf("Basic cases:\n");
+    test_get_column(0, 5, 5, 0);    // First pixel
+    test_get_column(4, 5, 5, 4);    // Last pixel of first row
+    test_get_column(5, 5, 5, 0);    // First pixel of second row
+    test_get_column(24, 5, 5, 4);   // Last pixel
+    
+    printf("Single row/column edge cases:\n");
+    test_get_column(0, 1, 10, 0);   // Single column
+    test_get_column(9, 1, 10, 0);   // Single column
+    test_get_column(0, 10, 1, 0);   // Single row, first pixel
+    test_get_column(9, 10, 1, 9);   // Single row, last pixel
+    
+    printf("Modular arithmetic stress tests:\n");
+    // Test that column calculation is correct for various patterns
+    for (int w = 3; w <= 13; w += 2) {  // Test odd widths
+        for (int test_col = 0; test_col < w; test_col++) {
+            if (is_valid_imagesize(w, 10)) {
+                // Test same column in different rows
+                test_get_column(test_col, w, 10, test_col);           // Row 0
+                test_get_column(w + test_col, w, 10, test_col);       // Row 1
+                test_get_column(2 * w + test_col, w, 10, test_col);   // Row 2
+                test_get_column(5 * w + test_col, w, 10, test_col);   // Row 5
+                test_get_column(9 * w + test_col, w, 10, test_col);   // Row 9
+            }
+        }
+    }
+    
+    printf("Prime width tests:\n");
+    // Test with prime widths to catch modular arithmetic errors
+    test_get_column(0, 7, 7, 0);
+    test_get_column(6, 7, 7, 6);
+    test_get_column(7, 7, 7, 0);   // Start of second row
+    test_get_column(13, 7, 7, 6);  // End of second row
+    test_get_column(14, 7, 7, 0);  // Start of third row
+    
+    // =========================================================================
+    // SECTION 4: is_valid_pixel TESTS
+    // =========================================================================
+    printf("\n=== TESTING is_valid_pixel ===\n");
+    
+    printf("Basic valid cases:\n");
+    test_is_valid_pixel(0, 0, 5, 5, true);    // Top-left
+    test_is_valid_pixel(0, 4, 5, 5, true);    // Top-right
+    test_is_valid_pixel(4, 0, 5, 5, true);    // Bottom-left
+    test_is_valid_pixel(4, 4, 5, 5, true);    // Bottom-right
+    test_is_valid_pixel(2, 2, 5, 5, true);    // Center
+    
+    printf("Basic invalid cases:\n");
+    test_is_valid_pixel(-1, 0, 5, 5, false);  // Negative row
+    test_is_valid_pixel(0, -1, 5, 5, false);  // Negative col
+    test_is_valid_pixel(-1, -1, 5, 5, false); // Both negative
+    test_is_valid_pixel(5, 0, 5, 5, false);   // Row too large
+    test_is_valid_pixel(0, 5, 5, 5, false);   // Col too large
+    test_is_valid_pixel(5, 5, 5, 5, false);   // Both too large
+    test_is_valid_pixel(10, 10, 5, 5, false); // Way too large
+    
+    printf("Boundary tests:\n");
+    // Test exact boundaries
+    test_is_valid_pixel(0, 0, 1, 1, true);    // Single pixel image
+    test_is_valid_pixel(0, 1, 1, 1, false);   // Out of bounds
+    test_is_valid_pixel(1, 0, 1, 1, false);   // Out of bounds
+    
+    // Test with rectangular images
+    test_is_valid_pixel(0, 9, 10, 5, true);   // Wide image, valid
+    test_is_valid_pixel(0, 10, 10, 5, false); // Wide image, invalid col
+    test_is_valid_pixel(5, 0, 10, 5, false);  // Wide image, invalid row
+    test_is_valid_pixel(4, 5, 5, 10, false);   // Tall image, valid
+    test_is_valid_pixel(4, 4, 5, 10, true);   // Tall image, valid
+    test_is_valid_pixel(10, 0, 5, 10, false); // Tall image, invalid row
+    
+    printf("Extreme coordinate tests:\n");
+    // Test with large valid dimensions
+    test_is_valid_pixel(999, 999, 1000, 1000, true);
+    test_is_valid_pixel(1000, 999, 1000, 1000, false);
+    test_is_valid_pixel(999, 1000, 1000, 1000, false);
+    
+    // Test systematic boundary scanning
+    printf("Systematic boundary scanning:\n");
+    for (int dim = 2; dim <= 6; dim++) {
+        if (is_valid_imagesize(dim, dim)) {
+            // Test all boundary pixels
+            for (int i = 0; i < dim; i++) {
+                test_is_valid_pixel(0, i, dim, dim, true);      // Top edge
+                test_is_valid_pixel(dim-1, i, dim, dim, true);  // Bottom edge
+                test_is_valid_pixel(i, 0, dim, dim, true);      // Left edge
+                test_is_valid_pixel(i, dim-1, dim, dim, true);  // Right edge
+            }
+            // Test just outside boundaries
+            test_is_valid_pixel(-1, 0, dim, dim, false);        // Above top
+            test_is_valid_pixel(dim, 0, dim, dim, false);       // Below bottom
+            test_is_valid_pixel(0, -1, dim, dim, false);        // Left of left
+            test_is_valid_pixel(0, dim, dim, dim, false);       // Right of right
+        }
+    }
+    
+    // =========================================================================
+    // SECTION 5: get_index TESTS
+    // =========================================================================
+    printf("\n=== TESTING get_index ===\n");
+    
+    printf("Basic cases:\n");
+    test_get_index(0, 0, 5, 5, 0);    // Top-left
+    test_get_index(0, 4, 5, 5, 4);    // Top-right
+    test_get_index(4, 0, 5, 5, 20);   // Bottom-left
+    test_get_index(4, 4, 5, 5, 24);   // Bottom-right
+    test_get_index(2, 2, 5, 5, 12);   // Center
+    
+    printf("Single row/column cases:\n");
+    test_get_index(0, 0, 1, 10, 0);   // Single column, first
+    test_get_index(9, 0, 1, 10, 9);   // Single column, last
+    test_get_index(0, 0, 10, 1, 0);   // Single row, first
+    test_get_index(0, 9, 10, 1, 9);   // Single row, last
+    
+    printf("Mathematical formula verification:\n");
+    // Test the formula: index = row * width + col
+    for (int w = 2; w <= 8; w++) {
+        for (int h = 2; h <= 8; h++) {
+            if (is_valid_imagesize(w, h)) {
+                for (int r = 0; r < h; r += (h > 4 ? 2 : 1)) {
+                    for (int c = 0; c < w; c += (w > 4 ? 2 : 1)) {
+                        int expected = r * w + c;
+                        test_get_index(r, c, w, h, expected);
+                    }
+                }
+            }
+        }
+    }
+    
+    printf("Large dimension tests:\n");
+    test_get_index(0, 0, 1000, 1000, 0);
+    test_get_index(0, 999, 1000, 1000, 999);
+    test_get_index(999, 0, 1000, 1000, 999000);
+    test_get_index(999, 999, 1000, 1000, 999999);
+    test_get_index(500, 500, 1000, 1000, 500500);
+    
+    printf("Prime dimension tests:\n");
+    // Test with prime dimensions to catch arithmetic errors
+    test_get_index(0, 0, 7, 11, 0);
+    test_get_index(0, 6, 7, 11, 6);
+    test_get_index(1, 0, 7, 11, 7);
+    test_get_index(10, 6, 7, 11, 76);
+    
+    // =========================================================================
+    // SECTION 6: ROUND-TRIP CONSISTENCY TESTS
+    // =========================================================================
+    printf("\n=== ROUND-TRIP CONSISTENCY TESTS ===\n");
+    
+    printf("Index to coordinates and back:\n");
+    // Test various image sizes and all indices
+    for (int w = 1; w <= 8; w++) {
+        for (int h = 1; h <= 8; h++) {
+            if (is_valid_imagesize(w, h)) {
+                int total_pixels = w * h;
+                // Test all indices for small images
+                if (total_pixels <= 25) {
+                    for (int idx = 0; idx < total_pixels; idx++) {
+                        test_index_roundtrip(idx, w, h);
+                    }
+                } else {
+                    // Test strategic indices for larger images
+                    test_index_roundtrip(0, w, h);              // First
+                    test_index_roundtrip(total_pixels - 1, w, h); // Last
+                    test_index_roundtrip(total_pixels / 2, w, h); // Middle
+                    test_index_roundtrip(w - 1, w, h);           // End of first row
+                    test_index_roundtrip(w, w, h);               // Start of second row
+                }
+            }
+        }
+    }
+    
+    printf("Coordinates to index and back:\n");
+    // Test coordinate round-trips
+    for (int w = 1; w <= 8; w++) {
+        for (int h = 1; h <= 8; h++) {
+            if (is_valid_imagesize(w, h)) {
+                // Test all coordinates for small images
+                if (w * h <= 25) {
+                    for (int r = 0; r < h; r++) {
+                        for (int c = 0; c < w; c++) {
+                            test_coordinate_roundtrip(r, c, w, h);
+                        }
+                    }
+                } else {
+                    // Test strategic coordinates for larger images
+                    test_coordinate_roundtrip(0, 0, w, h);           // Top-left
+                    test_coordinate_roundtrip(0, w-1, w, h);         // Top-right
+                    test_coordinate_roundtrip(h-1, 0, w, h);         // Bottom-left
+                    test_coordinate_roundtrip(h-1, w-1, w, h);       // Bottom-right
+                    test_coordinate_roundtrip(h/2, w/2, w, h);       // Center
+                }
+            }
+        }
+    }
+    
+    // =========================================================================
+    // SECTION 7: STRESS TESTS WITH LARGE DIMENSIONS
+    // =========================================================================
+    printf("\n=== LARGE DIMENSION STRESS TESTS ===\n");
+    
+    printf("Testing with maximum safe dimensions:\n");
+    // Find largest square that doesn't overflow
+    int max_square = 46340; // sqrt(int_max) approximately
+    if (is_valid_imagesize(max_square, max_square)) {
+        printf("Testing with %dx%d image:\n", max_square, max_square);
+        test_get_row(0, max_square, max_square, 0);
+        test_get_row(max_square - 1, max_square, max_square, 0);
+        test_get_row(max_square, max_square, max_square, 1);
+        test_get_column(0, max_square, max_square, 0);
+        test_get_column(max_square - 1, max_square, max_square, max_square - 1);
+        test_get_column(max_square, max_square, max_square, 0);
+        
+        test_is_valid_pixel(0, 0, max_square, max_square, true);
+        test_is_valid_pixel(max_square - 1, max_square - 1, max_square, max_square, true);
+        test_is_valid_pixel(max_square, 0, max_square, max_square, false);
+        test_is_valid_pixel(0, max_square, max_square, max_square, false);
+        
+        test_get_index(0, 0, max_square, max_square, 0);
+        test_get_index(0, max_square - 1, max_square, max_square, max_square - 1);
+        
+        // Test some round-trips with large dimensions
+        test_index_roundtrip(0, max_square, max_square);
+        test_index_roundtrip(max_square - 1, max_square, max_square);
+        test_index_roundtrip(max_square, max_square, max_square);
+        test_coordinate_roundtrip(0, 0, max_square, max_square);
+        test_coordinate_roundtrip(1, 1, max_square, max_square);
+    }
+    
+    // =========================================================================
+    // SECTION 8: MATHEMATICAL PROPERTY TESTS
+    // =========================================================================
+    printf("\n=== MATHEMATICAL PROPERTY VERIFICATION ===\n");
+    
+    printf("Testing mathematical properties:\n");
+    
+    // Property: For any valid index i in a w×h image:
+    // get_index(get_row(i, w, h), get_column(i, w, h), w, h) == i
+    printf("Index decomposition and reconstruction property:\n");
+    for (int w = 2; w <= 10; w += 2) {
+        for (int h = 2; h <= 10; h += 2) {
+            if (is_valid_imagesize(w, h)) {
+                int total = w * h;
+                for (int i = 0; i < total; i += (total > 20 ? total/10 : 1)) {
+                    int row = get_row(i, w, h);
+                    int col = get_column(i, w, h);
+                    int reconstructed = get_index(row, col, w, h);
+                    assert(i == reconstructed);
+                    printf("PASS: Index property for i=%d: %d == %d\n", i, i, reconstructed);
+                }
+            }
+        }
+    }
+    
+    // Property: row * width + col == index
+    printf("Index formula verification:\n");
+    for (int w = 3; w <= 9; w += 3) {
+        for (int h = 3; h <= 9; h += 3) {
+            if (is_valid_imagesize(w, h)) {
+                for (int r = 0; r < h; r++) {
+                    for (int c = 0; c < w; c++) {
+                        int calculated_index = r * w + c;
+                        int function_index = get_index(r, c, w, h);
+                        assert(calculated_index == function_index);
+                        printf("PASS: Formula verification (%d,%d): %d*%d+%d = %d\n", 
+                               r, c, r, w, c, function_index);
+                    }
+                }
+            }
+        }
+    }
+    
+    // Property: Adjacent indices should differ by 1 within a row
+    printf("Adjacent index property within rows:\n");
+    for (int w = 5; w <= 10; w++) {
+        if (is_valid_imagesize(w, 5)) {
+            for (int r = 0; r < 5; r++) {
+                for (int c = 0; c < w - 1; c++) {
+                    int idx1 = get_index(r, c, w, 5);
+                    int idx2 = get_index(r, c + 1, w, 5);
+                    assert(idx2 == idx1 + 1);
+                    printf("PASS: Adjacent columns (%d,%d) and (%d,%d): %d -> %d\n", 
+                           r, c, r, c+1, idx1, idx2);
+                }
+            }
+        }
+    }
+    
+    // Property: First column of next row should be width away from first column of current row
+    printf("Row transition property:\n");
+    for (int w = 3; w <= 8; w++) {
+        if (is_valid_imagesize(w, 6)) {
+            for (int r = 0; r < 5; r++) {
+                int curr_row_start = get_index(r, 0, w, 6);
+                int next_row_start = get_index(r + 1, 0, w, 6);
+                assert(next_row_start == curr_row_start + w);
+                printf("PASS: Row transition from row %d to %d: %d -> %d (diff=%d)\n", 
+                       r, r+1, curr_row_start, next_row_start, w);
+            }
+        }
+    }
+    
+    // =========================================================================
+    // SECTION 9: COMPREHENSIVE INTEGRATION TESTS
+    // =========================================================================
+    printf("\n=== COMPREHENSIVE INTEGRATION TESTS ===\n");
+    
+    printf("Testing complex scenarios with multiple function interactions:\n");
+    
+    // Scenario: Image processing simulation
+    printf("Image processing simulation scenarios:\n");
+    int[] test_widths = alloc_array(int, 7);
+    test_widths[0] = 3; test_widths[1] = 5; test_widths[2] = 7; test_widths[3] = 10;
+    test_widths[4] = 16; test_widths[5] = 32; test_widths[6] = 100;
+    
+    int[] test_heights = alloc_array(int, 7);
+    test_heights[0] = 3; test_heights[1] = 5; test_heights[2] = 7; test_heights[3] = 10;
+    test_heights[4] = 16; test_heights[5] = 32; test_heights[6] = 100;
+    
+    for (int wi = 0; wi < 7; wi++) {
+        for (int hi = 0; hi < 7; hi++) {
+            int w = test_widths[wi];
+            int h = test_heights[hi];
+            
+            if (is_valid_imagesize(w, h)) {
+                printf("Processing %dx%d image:\n", w, h);
+                
+                // Test all corner pixels - manually define coordinates
+                // Top-left: (0,0), Top-right: (0,w-1), Bottom-left: (h-1,0), Bottom-right: (h-1,w-1)
+                int[] corner_rows = alloc_array(int, 4);
+                int[] corner_cols = alloc_array(int, 4);
+                corner_rows[0] = 0; corner_cols[0] = 0;           // Top-left
+                corner_rows[1] = 0; corner_cols[1] = w-1;         // Top-right  
+                corner_rows[2] = h-1; corner_cols[2] = 0;         // Bottom-left
+                corner_rows[3] = h-1; corner_cols[3] = w-1;       // Bottom-right
+                
+                for (int i = 0; i < 4; i++) {
+                    int r = corner_rows[i];
+                    int c = corner_cols[i];
+                    
+                    assert(is_valid_pixel(r, c, w, h));
+                    int idx = get_index(r, c, w, h);
+                    assert(get_row(idx, w, h) == r);
+                    assert(get_column(idx, w, h) == c);
+                    printf("PASS: Corner (%d,%d) -> index %d -> (%d,%d)\n", 
+                           r, c, idx, get_row(idx, w, h), get_column(idx, w, h));
+                }
+                
+                // Test center pixel if image is large enough
+                if (w >= 3 && h >= 3) {
+                    int center_r = h / 2;
+                    int center_c = w / 2;
+                    assert(is_valid_pixel(center_r, center_c, w, h));
+                    int center_idx = get_index(center_r, center_c, w, h);
+                    assert(get_row(center_idx, w, h) == center_r);
+                    assert(get_column(center_idx, w, h) == center_c);
+                    printf("PASS: Center (%d,%d) -> index %d -> (%d,%d)\n", 
+                           center_r, center_c, center_idx, 
+                           get_row(center_idx, w, h), get_column(center_idx, w, h));
+                }
+                
+                // Test boundary validation
+                assert(!is_valid_pixel(-1, 0, w, h));
+                assert(!is_valid_pixel(0, -1, w, h));
+                assert(!is_valid_pixel(h, 0, w, h));
+                assert(!is_valid_pixel(0, w, w, h));
+                printf("PASS: Boundary validation for %dx%d\n", w, h);
+            }
+        }
+    }
+    
+    printf("\n=== ALL TESTS COMPLETED SUCCESSFULLY ===\n");
+    printf("Total test categories: 9\n");
+    printf("✓ Image size validation\n");
+    printf("✓ Row extraction\n");
+    printf("✓ Column extraction\n");
+    printf("✓ Pixel validation\n");
+    printf("✓ Index calculation\n");
+    printf("✓ Round-trip consistency\n");
+    printf("✓ Large dimension stress tests\n");
+    printf("✓ Mathematical property verification\n");
+    printf("✓ Integration scenarios\n");
+    printf("\nAll imageutil functions have been thoroughly tested with industrial-standard rigor!\n");
+    
+    return 0;
+}
