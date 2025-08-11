@@ -1,4 +1,4 @@
-#use "pixel-int.c0"
+#use "imageutil.c0"
 //auxiliary functions
 pixel_t hide_pixel(pixel_t cover, pixel_t secret, int quality)
 //@requires 1 <= quality && quality <= 7;
@@ -11,7 +11,7 @@ pixel_t hide_pixel(pixel_t cover, pixel_t secret, int quality)
   int alpha_cover = get_alpha(cover) & c_mask;
   int red_cover = get_red(cover) & c_mask;
   int green_cover = get_green(cover) & c_mask;
-  int blue_cover = get_blue(cover) & c_mask;	
+  int blue_cover = get_blue(cover) & c_mask;
 
   int alpha_secret = (get_alpha(secret) >> c_quality) & s_mask;
   int red_secret = (get_red(secret) >> c_quality) & s_mask;
@@ -25,12 +25,44 @@ pixel_t hide_pixel(pixel_t cover, pixel_t secret, int quality)
 
   return make_pixel(alpha_stego, red_stego, green_stego, blue_stego);
 }
-/*
-pixel_t unhide_pixel()
-
+pixel_t unhide_pixel(pixel_t stego, int quality)
+{
+    int n = 8 - quality;
+    return make_pixel(
+        (get_alpha(stego) << n),
+        (get_red(stego) << n),
+        (get_green(stego) << n),
+        (get_blue(stego) << n)
+    );
+}
 //hide & unhide functions
 pixel_t[] hide(pixel_t[] cover, pixel_t[] secret, int width, int height,
-int quality);
+int quality)
+//@requires 1 <= quality && quality <= 7;
+//@requires is_valid_imagesize(width, height);
+//@requires \length(cover) == width*height && \length(secret) == width*height;
+//@ensures \length(\result) == width*height;
+{
+  pixel_t[] stego = alloc_array(pixel_t, width*height);
+  for (int i = 0; i < width*height; i++)
+  //@loop_invariant 0 <= i && i <= width*height;
+    {
+      stego[i] = hide_pixel(cover[i], secret[i], quality);
+    }
+  return stego;
+}
 
-pixel_t[] unhide(pixel_t[] stego, int width, int height, int quality);
-*/
+pixel_t[] unhide(pixel_t[] stego, int width, int height, int quality)
+//@requires 1 <= quality && quality <= 7;
+//@requires is_valid_imagesize(width, height);
+//@requires \length(stego) == width*height;
+//@ensures \length(\result) == width*height;
+{
+  pixel_t[] recover = alloc_array(pixel_t, width*height);
+  for (int i = 0; i < width*height; i++)
+  //@loop_invariant 0 <= i && i <= width*height;
+    {
+      recover[i] = unhide_pixel(stego[i], quality);
+    }
+  return recover;
+}

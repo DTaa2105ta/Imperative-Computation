@@ -4,6 +4,7 @@
 /**************************************************************************/
 #use <conio>
 #use <img>
+#use "stego.c0"
 
 
 
@@ -36,6 +37,71 @@ int main() {
 
 
   // Test hide and unhide on your small images
+  printf("Testing hide and unhide functions...\n");
+  
+  // Test 1: Create a simple 2x2 cover image 
+  pixel_t[] cover = alloc_array(pixel_t, 4);
+  cover[0] = make_pixel(255, 200, 100, 50);   // cover pixel 1
+  cover[1] = make_pixel(255, 150, 75, 25);    // cover pixel 2  
+  cover[2] = make_pixel(255, 100, 200, 150);  // cover pixel 3
+  cover[3] = make_pixel(255, 50, 25, 200);    // cover pixel 4
+  
+  // Test 1: Create a simple 2x2 secret image
+  pixel_t[] secret = alloc_array(pixel_t, 4);
+  secret[0] = make_pixel(255, 255, 0, 0);     // red pixel
+  secret[1] = make_pixel(255, 0, 255, 0);     // green pixel
+  secret[2] = make_pixel(255, 0, 0, 255);     // blue pixel
+  secret[3] = make_pixel(255, 255, 255, 255); // white pixel
+  
+  int test_width = 2;
+  int test_height = 2; 
+  int test_quality = 4; // Use quality 4 for testing
+  
+  printf("Cover image:\n");
+  image_print(cover, test_width, test_height);
+  printf("Secret image:\n");  
+  image_print(secret, test_width, test_height);
+  
+  // Test hide function
+  pixel_t[] stego = hide(cover, secret, test_width, test_height, test_quality);
+  printf("Steganographic image (after hiding):\n");
+  image_print(stego, test_width, test_height);
+  
+  // Test unhide function
+  pixel_t[] recovered = unhide(stego, test_width, test_height, test_quality);
+  printf("Recovered secret image (after unhiding):\n");
+  image_print(recovered, test_width, test_height);
+  
+  // Verify that unhide recovers something similar to the original secret
+  // Note: Due to quality loss, recovered won't be exactly the same as secret
+  printf("Testing hide/unhide with different qualities...\n");
+  
+  // Test with different quality levels
+  for (int q = 1; q <= 7; q++) {
+    pixel_t[] stego_q = hide(cover, secret, test_width, test_height, q);
+    pixel_t[] recovered_q = unhide(stego_q, test_width, test_height, q);
+    printf("Quality %d - First pixel recovery: ", q);
+    printf("Original: (%d,%d,%d,%d) -> Recovered: (%d,%d,%d,%d)\n",
+           get_alpha(secret[0]), 
+           get_red(secret[0]), 
+           get_green(secret[0]), 
+           get_blue(secret[0]),
+           get_alpha(recovered_q[0]), 
+           get_red(recovered_q[0]), 
+           get_green(recovered_q[0]), 
+           get_blue(recovered_q[0]));
+  }
+  
+  // Test 2: Using the small 2x2 image A that was already created
+  printf("\nTesting with image A as both cover and secret...\n");
+  pixel_t[] stego_A = hide(A, A, width_A, height_A, 3);
+  pixel_t[] recovered_A = unhide(stego_A, width_A, height_A, 3);
+  printf("Original A:\n");
+  image_print(A, width_A, height_A);
+  printf("A hidden in itself and recovered:\n");
+  image_print(recovered_A, width_A, height_A);
+  
+  printf("Hide and unhide tests completed!\n");
 
 
 
