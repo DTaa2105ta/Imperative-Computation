@@ -1,0 +1,36 @@
+#use "pixel-int.c0"
+//auxiliary functions
+pixel_t hide_pixel(pixel_t cover, pixel_t secret, int quality)
+//@requires 1 <= quality && quality <= 7;
+{
+  int c_mask = 0xFF << quality;  
+  int s_mask = 0xFF - c_mask;
+  
+  int c_quality = 8 - quality;
+  
+  int alpha_cover = get_alpha(cover) & c_mask;
+  int red_cover = get_red(cover) & c_mask;
+  int green_cover = get_green(cover) & c_mask;
+  int blue_cover = get_blue(cover) & c_mask;	
+
+  int alpha_secret = (get_alpha(secret) >> c_quality) & s_mask;
+  int red_secret = (get_red(secret) >> c_quality) & s_mask;
+  int green_secret = (get_green(secret) >> c_quality) & s_mask;
+  int blue_secret = (get_blue(secret) >> c_quality) & s_mask;
+  
+  int alpha_stego = alpha_cover | alpha_secret;
+  int red_stego = red_cover | red_secret;
+  int green_stego = green_cover | green_secret;
+  int blue_stego = blue_cover | blue_secret;
+
+  return make_pixel(alpha_stego, red_stego, green_stego, blue_stego);
+}
+/*
+pixel_t unhide_pixel()
+
+//hide & unhide functions
+pixel_t[] hide(pixel_t[] cover, pixel_t[] secret, int width, int height,
+int quality);
+
+pixel_t[] unhide(pixel_t[] stego, int width, int height, int quality);
+*/
