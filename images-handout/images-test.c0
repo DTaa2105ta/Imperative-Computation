@@ -106,9 +106,27 @@ int main() {
 
 
   // Test crop on your small images
+  void test_crop_center() {
+    pixel_t[] img = load_image("img/bee.png");
+    int w = get_width(img);
+    int h = get_height(img);
+    int nw = 10, nh = 10;
+    int left = (w - nw) / 2;
+    int top = (h - nh) / 2;
+    pixel_t[] cropped = crop(img, w, h, left, top, nw, nh);
+    assert(\length(cropped) == nw * nh);
+    // Optionally check pixel values
+}
 
+void test_crop_full_image() {
+    pixel_t[] img = load_image("img/carnegie.png");
+    int w = get_width(img);
+    int h = get_height(img);
+    pixel_t[] cropped = crop(img, w, h, 0, 0, w, h);
+    assert(images_equal(img, cropped));
+}
 
-
+// ...more tests as described above
   // Test upsize on your small images
 
 
