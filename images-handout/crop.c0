@@ -1,0 +1,26 @@
+#use "imageutil.c0" 
+pixel_t[] crop(pixel_t[] pixels, int width, int height, int left, 
+int top, int new_width, int new_height)
+
+//@requires is_valid_imagesize(width, height);
+//@requires \length(pixels) == width * height;
+//@ensures \length(\result) == new_width * new_height;
+/*
+Returns a cropped image of size new_width x new_height,
+starting from (left, top) in the original image.
+*/
+{
+  pixel_t[] new_pixels = alloc_array(pixel_t, new_width * new_height);
+  for (int row = 0; row < new_height; row++)
+  //@loop_invariant 0 <= row && row <= new_height;
+  {
+    for (int col = 0; col < new_width; col++)
+    //@loop_invariant 0 <= col && col <= new_width;
+    {
+      int src_index = get_index(top + row, left + col, width, height);
+      int dst_index = get_index(row, col, new_width, new_height);
+      new_pixels[dst_index] = pixels[src_index];
+    }
+  }
+  return new_pixels;
+}
